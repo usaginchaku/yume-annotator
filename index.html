@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<title>夢小説アノテーションツール Ver. 1.12</title>
-<link rel="stylesheet" href="styles.css?v=1.12">
-<link rel="stylesheet" href="ui-enhancements.css?v=1.12">
+<title>夢小説アノテーションツール Ver. 1.13</title>
+<link rel="stylesheet" href="styles.css?v=1.13">
+<link rel="stylesheet" href="ui-enhancements.css?v=1.13">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.12</span></div>
+    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.13</span></div>
     <div class="top-actions">
       <button class="btn small" id="exportJsonBtn">JSON書出</button>
       <button class="btn small" id="importJsonBtn">JSON読込</button>
@@ -151,7 +151,18 @@
   <h2>アノテーション編集</h2>
   <div id="editAnnotationQuote" class="quote-box"></div>
   <div class="form-grid" style="margin-top:12px">
-    <label class="label">評価<select id="editAnnotationRating" class="field"><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select></label>
+    <label class="label">評価
+      <select id="editAnnotationRating" hidden aria-hidden="true" tabindex="-1">
+        <option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option>
+      </select>
+      <div class="rating-row" id="editRatingRow">
+        <button type="button" class="rating-btn" data-rating="3" aria-label="死ぬほど好き">❤️❤️❤️</button>
+        <button type="button" class="rating-btn" data-rating="2" aria-label="かなり好き">❤️❤️</button>
+        <button type="button" class="rating-btn" data-rating="1" aria-label="好き">❤️</button>
+        <button type="button" class="rating-btn" data-rating="0" aria-label="普通・気になる">△</button>
+        <button type="button" class="rating-btn" data-rating="-1" aria-label="萎え・嫌い">❌</button>
+      </div>
+    </label>
     <label class="label">コメント<textarea id="editAnnotationComment" class="field"></textarea></label>
   </div>
   <div class="modal-actions"><button type="button" class="btn" data-close="annotationEditDialog">キャンセル</button><button type="button" class="btn primary" id="updateAnnotationBtn">保存</button></div>
@@ -160,8 +171,9 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=1.12"></script>
-<script src="import-filename.js?v=1.12"></script>
-<script src="ui-enhancements.js?v=1.12"></script>
+<script src="app.js?v=1.13"></script>
+<script src="import-filename.js?v=1.13"></script>
+<script src="ui-enhancements.js?v=1.13"></script>
+<script src="annotation-edit-ui.js?v=1.13"></script>
 </body>
 </html>
