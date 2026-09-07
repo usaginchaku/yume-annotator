@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<title>夢小説アノテーションツール Ver. 1.3</title>
+<title>夢小説アノテーションツール Ver. 1.4</title>
 <style>
   :root {
     --bg:#f7f4f1; --panel:#fffdfb; --text:#2f2926; --muted:#7a6f69; --line:#e7ded8;
@@ -61,7 +61,7 @@
   mark.r0 { background:#eee8c8; }
   mark.rn1 { background:#ead3d1; text-decoration:underline wavy #a63d3b 1px; text-underline-offset:3px; }
   .app-version { font-size:.68em; font-weight:700; color:var(--muted); white-space:nowrap; }
-  .bottom-eval { position:fixed; left:0; right:0; bottom:var(--visual-bottom, 0px); z-index:40; padding:10px max(12px,env(safe-area-inset-right)) calc(10px + var(--safe-bottom)) max(12px,env(safe-area-inset-left)); background:linear-gradient(to top,rgba(247,244,241,1) 74%,rgba(247,244,241,.92)); border-top:1px solid var(--line); }
+  .bottom-eval { position:fixed; left:0; right:0; bottom:0; z-index:40; padding:10px max(12px,env(safe-area-inset-right)) calc(10px + var(--safe-bottom)) max(12px,env(safe-area-inset-left)); background:linear-gradient(to top,rgba(247,244,241,1) 74%,rgba(247,244,241,.92)); border-top:1px solid var(--line); }
   .bottom-eval-inner { width:min(940px,100%); margin:auto; display:flex; gap:8px; }
   #evaluateSelectionBtn { width:100%; font-weight:800; }
   #selectionStatus { flex:0 0 auto; align-self:center; color:var(--muted); font-size:12px; max-width:30%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -69,14 +69,9 @@
   dialog::backdrop { background:rgba(36,28,25,.42); backdrop-filter:blur(2px); }
   .modal { padding:18px; background:var(--panel); }
   .modal h2 { font-size:20px; margin-bottom:14px; }
-  .annotation-modal-head {
-    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
-  }
+  .annotation-modal-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
   .annotation-modal-head h2 { margin:0; }
-  .modal-close-x {
-    flex:0 0 auto; width:44px; height:44px; min-height:44px; padding:0; display:grid; place-items:center;
-    border:0; background:transparent; color:var(--muted); border-radius:999px; font-size:30px; line-height:1; cursor:pointer;
-  }
+  .modal-close-x { flex:0 0 auto; width:44px; height:44px; min-height:44px; padding:0; display:grid; place-items:center; border:0; background:transparent; color:var(--muted); border-radius:999px; font-size:30px; line-height:1; cursor:pointer; }
   .modal-close-x:active { background:#f2ece8; }
   .form-grid { display:grid; gap:12px; }
   .label { display:grid; gap:6px; color:#514843; font-size:13px; font-weight:700; }
@@ -95,52 +90,15 @@
   .toast.show { opacity:1; }
   .file-input { display:none; }
   .danger-zone { border-top:1px solid var(--line); margin-top:16px; padding-top:16px; }
-
-  /* Work editor: keep actions reachable and make the form itself scroll on iPhone Safari. */
   #workDialog { overflow:hidden; }
-  #workDialog .modal {
-    display:flex;
-    flex-direction:column;
-    max-height:88dvh;
-    overflow:hidden;
-    padding:0;
-  }
-  .work-modal-head {
-    flex:0 0 auto;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:14px 16px 10px;
-    border-bottom:1px solid var(--line);
-    background:var(--panel);
-  }
+  #workDialog .modal { display:flex; flex-direction:column; max-height:88dvh; overflow:hidden; padding:0; }
+  .work-modal-head { flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:14px 16px 10px; border-bottom:1px solid var(--line); background:var(--panel); }
   .work-modal-head h2 { margin:0; font-size:20px; flex:1; min-width:0; }
   .work-modal-head .btn { flex:0 0 auto; }
   #workDialogFileBtn { font-size:13px; padding-inline:10px; }
   #workForm { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-  .work-fields {
-    flex:1 1 auto;
-    min-height:0;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
-    padding:14px 16px 22px;
-    display:grid;
-    gap:12px;
-    touch-action:pan-y;
-  }
-  .work-actions {
-    flex:0 0 auto;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    padding:10px 16px calc(10px + var(--safe-bottom));
-    margin:0;
-    border-top:1px solid var(--line);
-    background:rgba(255,253,251,.97);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-  }
+  .work-fields { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:14px 16px 22px; display:grid; gap:12px; touch-action:pan-y; }
+  .work-actions { flex:0 0 auto; display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 16px calc(10px + var(--safe-bottom)); margin:0; border-top:1px solid var(--line); background:rgba(255,253,251,.97); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
   .work-actions .btn { min-height:48px; font-weight:800; }
   #workDeleteArea { flex:0 0 auto; margin:0; padding:10px 16px calc(10px + var(--safe-bottom)); background:var(--panel); }
   #workText { min-height:320px !important; line-height:1.75; }
@@ -157,14 +115,7 @@
     .rating-btn { font-size:15px; padding:6px 2px; }
     #readerText { font-size:17px; line-height:2; }
     .text-wrap { padding:18px 15px; border-radius:15px; }
-    #workDialog {
-      width:calc(100% - 16px);
-      max-width:none;
-      height:calc(100dvh - 16px);
-      max-height:calc(100dvh - 16px);
-      margin:auto;
-      border-radius:20px;
-    }
+    #workDialog { width:calc(100% - 16px); max-width:none; height:calc(100dvh - 16px); max-height:calc(100dvh - 16px); margin:auto; border-radius:20px; }
     #workDialog .modal { height:100%; max-height:none; }
     .work-modal-head { padding-top:max(14px, env(safe-area-inset-top)); }
     .work-fields { padding:14px 16px 28px; }
@@ -176,7 +127,7 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.3</span></div>
+    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.4</span></div>
     <div class="top-actions">
       <button class="btn small" id="exportJsonBtn">JSON<span class="label-text">出力</span></button>
       <button class="btn small" id="importJsonBtn">JSON<span class="label-text">読込</span></button>
@@ -184,457 +135,69 @@
       <input id="importFile" class="file-input" type="file" accept="application/json,.json">
     </div>
   </header>
-
   <main>
     <section id="listView" class="view">
-      <div class="hero">
-        <div><h1>作品一覧</h1><div class="subtle">本文を読みながら「萌え／萎え」をその場で記録します。</div></div>
-        <button class="btn primary" id="newWorkBtn">＋ 新規作品</button>
-      </div>
-      <div class="toolbar">
-        <input id="searchInput" type="search" placeholder="タイトル・キャラクター・作品名を検索">
-        <select id="characterFilter"><option value="">全キャラ</option></select>
-        <select id="versionFilter"><option value="">OLD / NEW</option><option value="old">OLD</option><option value="new">NEW</option></select>
-      </div>
+      <div class="hero"><div><h1>作品一覧</h1><div class="subtle">本文を読みながら「萌え／萎え」をその場で記録します。</div></div><button class="btn primary" id="newWorkBtn">＋ 新規作品</button></div>
+      <div class="toolbar"><input id="searchInput" type="search" placeholder="タイトル・キャラクター・作品名を検索"><select id="characterFilter"><option value="">全キャラ</option></select><select id="versionFilter"><option value="">OLD / NEW</option><option value="old">OLD</option><option value="new">NEW</option></select></div>
       <div id="workList" class="cards"></div>
     </section>
-
     <section id="readerView" class="view" hidden>
       <div class="reader-header">
-        <div class="reader-title-row">
-          <button class="btn small" id="backBtn">← 一覧</button>
-          <div style="min-width:0;flex:1">
-            <h1 id="readerTitle" style="margin-bottom:4px"></h1>
-            <div id="readerMeta" class="reader-meta"></div>
-          </div>
-        </div>
-        <div class="reader-actions">
-          <button class="btn small" id="editWorkBtn">作品情報を編集</button>
-          <button class="btn small" id="annotationsBtn">アノテーション一覧</button>
-        </div>
-        <label class="label">全体メモ
-          <textarea id="readerNotes" class="field work-note" placeholder="作品全体への感想・比較メモなど"></textarea>
-        </label>
+        <div class="reader-title-row"><button class="btn small" id="backBtn">← 一覧</button><div style="min-width:0;flex:1"><h1 id="readerTitle" style="margin-bottom:4px"></h1><div id="readerMeta" class="reader-meta"></div></div></div>
+        <div class="reader-actions"><button class="btn small" id="editWorkBtn">作品情報を編集</button><button class="btn small" id="annotationsBtn">アノテーション一覧</button></div>
+        <label class="label">全体メモ<textarea id="readerNotes" class="field work-note" placeholder="作品全体への感想・比較メモなど"></textarea></label>
       </div>
       <div class="text-wrap"><div id="readerText"></div></div>
     </section>
   </main>
-
-  <div id="bottomEval" class="bottom-eval" hidden>
-    <div class="bottom-eval-inner">
-      <button class="btn primary" id="evaluateSelectionBtn">この部分を評価</button>
-      <div id="selectionStatus">本文を選択してください</div>
-    </div>
-  </div>
+  <div id="bottomEval" class="bottom-eval" hidden><div class="bottom-eval-inner"><button class="btn primary" id="evaluateSelectionBtn">この部分を評価</button><div id="selectionStatus">本文を選択してください</div></div></div>
 </div>
-
-<dialog id="newWorkChoiceDialog"><div class="modal">
-  <h2>新規作品を追加</h2>
-  <div class="form-grid">
-    <button type="button" class="btn primary" id="newWorkDirectBtn">直接入力</button>
-    <button type="button" class="btn" id="newWorkFileBtn">ファイルから読み込み</button>
-    <div class="subtle">.txt / .md の本文を読み込み、作品情報を入力して保存できます。</div>
-    <input id="newWorkTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md">
-  </div>
-  <div class="modal-actions">
-    <button type="button" class="btn" data-close="newWorkChoiceDialog">キャンセル</button>
-  </div>
-</div></dialog>
-
-<dialog id="workDialog"><div class="modal">
-  <div class="work-modal-head">
-    <button type="button" class="btn small ghost" data-close="workDialog" aria-label="閉じる">←</button>
-    <h2 id="workDialogTitle">作品を追加</h2>
-    <button type="button" class="btn small" id="workDialogFileBtn">ファイルから読み込み</button>
-    <input id="workDialogTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md">
-  </div>
-  <form id="workForm">
-    <div class="work-fields">
-      <input type="hidden" id="workId">
-      <label class="label">タイトル *<input class="field" id="workTitle" required></label>
-      <label class="label">キャラクター *<input class="field" id="workCharacter" required></label>
-      <label class="label">プロンプト種別 *<select class="field" id="workVersion" required><option value="old">OLD</option><option value="new">NEW</option></select></label>
-      <label class="label">作品名 / シリーズ<input class="field" id="workSeries"></label>
-      <label class="label">比較ペアID（任意）<input class="field" id="workPair" placeholder="例: dio-001"></label>
-      <label class="label">シチュエーション（任意）<input class="field" id="workScenario"></label>
-      <label class="label">本文 *<textarea class="field" id="workText" required></textarea></label>
-    </div>
-    <div class="work-actions">
-      <button type="button" class="btn" data-close="workDialog">キャンセル</button>
-      <button type="submit" class="btn primary">保存</button>
-    </div>
-  </form>
-  <div id="workDeleteArea" class="danger-zone" hidden><button id="deleteWorkBtn" class="btn danger">この作品を削除</button></div>
-</div></dialog>
-
-<dialog id="annotationDialog"><div class="modal">
-  <div class="annotation-modal-head">
-    <h2 id="annotationDialogTitle">この部分を評価</h2>
-    <button type="button" class="modal-close-x" data-close="annotationDialog" aria-label="閉じる">×</button>
-  </div>
-  <div id="annotationQuote" class="quote-box"></div>
-  <div class="form-grid" style="margin-top:12px">
-    <label class="label">評価
-      <div class="rating-row" id="ratingRow">
-        <button type="button" class="rating-btn" data-rating="3" aria-label="死ぬほど好き">❤️❤️❤️</button>
-        <button type="button" class="rating-btn" data-rating="2" aria-label="かなり好き">❤️❤️</button>
-        <button type="button" class="rating-btn" data-rating="1" aria-label="好き">❤️</button>
-        <button type="button" class="rating-btn" data-rating="0" aria-label="普通・気になる">△</button>
-        <button type="button" class="rating-btn" data-rating="-1" aria-label="萎え・嫌い">❌</button>
-      </div>
-    </label>
-    <label class="label">コメント（空欄可）<textarea id="annotationComment" class="field" placeholder="承太郎すぎる、ここ最高、展開が早い…"></textarea></label>
-  </div>
-  <div class="modal-actions">
-    <button type="button" class="btn" data-close="annotationDialog">キャンセル</button>
-    <button type="button" class="btn primary" id="saveAnnotationBtn">保存</button>
-  </div>
-</div></dialog>
-
-<dialog id="annotationsDialog"><div class="modal">
-  <h2>アノテーション一覧</h2>
-  <label class="label" style="margin-bottom:12px">評価で絞り込み
-    <select id="annotationFilter" class="field"><option value="">すべて</option><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select>
-  </label>
-  <div id="annotationList" class="anno-list"></div>
-  <div class="modal-actions"><button type="button" class="btn" data-close="annotationsDialog">閉じる</button></div>
-</div></dialog>
-
-<dialog id="annotationEditDialog"><div class="modal">
-  <h2>アノテーション編集</h2>
-  <div id="editAnnotationQuote" class="quote-box"></div>
-  <div class="form-grid" style="margin-top:12px">
-    <label class="label">評価<select id="editAnnotationRating" class="field"><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select></label>
-    <label class="label">コメント<textarea id="editAnnotationComment" class="field"></textarea></label>
-  </div>
-  <div class="modal-actions"><button type="button" class="btn" data-close="annotationEditDialog">キャンセル</button><button type="button" class="btn primary" id="updateAnnotationBtn">保存</button></div>
-  <div class="danger-zone"><button type="button" class="btn danger" id="deleteAnnotationBtn">このアノテーションを削除</button></div>
-</div></dialog>
-
+<dialog id="newWorkChoiceDialog"><div class="modal"><h2>新規作品を追加</h2><div class="form-grid"><button type="button" class="btn primary" id="newWorkDirectBtn">直接入力</button><button type="button" class="btn" id="newWorkFileBtn">ファイルから読み込み</button><div class="subtle">.txt / .md の本文を読み込み、作品情報を入力して保存できます。</div><input id="newWorkTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md"></div><div class="modal-actions"><button type="button" class="btn" data-close="newWorkChoiceDialog">キャンセル</button></div></div></dialog>
+<dialog id="workDialog"><div class="modal"><div class="work-modal-head"><button type="button" class="btn small ghost" data-close="workDialog" aria-label="閉じる">←</button><h2 id="workDialogTitle">作品を追加</h2><button type="button" class="btn small" id="workDialogFileBtn">ファイルから読み込み</button><input id="workDialogTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md"></div><form id="workForm"><div class="work-fields"><input type="hidden" id="workId"><label class="label">タイトル *<input class="field" id="workTitle" required></label><label class="label">キャラクター *<input class="field" id="workCharacter" required></label><label class="label">プロンプト種別 *<select class="field" id="workVersion" required><option value="old">OLD</option><option value="new">NEW</option></select></label><label class="label">作品名 / シリーズ<input class="field" id="workSeries"></label><details><summary>詳細設定（任意）</summary><div class="form-grid" style="margin-top:12px"><label class="label">比較ペアID（任意）<input class="field" id="workPair" placeholder="例: DIO-001"></label><label class="label">シチュエーション（任意）<input class="field" id="workScenario"></label></div></details><label class="label">本文 *<textarea class="field" id="workText" required></textarea></label></div><div class="work-actions"><button type="button" class="btn" data-close="workDialog">キャンセル</button><button type="submit" class="btn primary">保存</button></div></form><div id="workDeleteArea" class="danger-zone" hidden><button id="deleteWorkBtn" class="btn danger">この作品を削除</button></div></div></dialog>
+<dialog id="annotationDialog" tabindex="-1"><div class="modal"><div class="annotation-modal-head"><h2>この部分を評価</h2><button type="button" class="modal-close-x" data-close="annotationDialog" aria-label="閉じる" autofocus>×</button></div><div id="annotationQuote" class="quote-box"></div><div class="form-grid" style="margin-top:12px"><label class="label">評価<div class="rating-row" id="ratingRow"><button type="button" class="rating-btn" data-rating="3">❤️❤️❤️</button><button type="button" class="rating-btn" data-rating="2">❤️❤️</button><button type="button" class="rating-btn" data-rating="1">❤️</button><button type="button" class="rating-btn" data-rating="0">△</button><button type="button" class="rating-btn" data-rating="-1">❌</button></div></label><label class="label">コメント（空欄可）<textarea id="annotationComment" class="field" placeholder="承太郎すぎる、ここ最高、展開が早い…"></textarea></label></div><div class="modal-actions"><button type="button" class="btn" data-close="annotationDialog">キャンセル</button><button type="button" class="btn primary" id="saveAnnotationBtn">保存</button></div></div></dialog>
+<dialog id="annotationsDialog" tabindex="-1"><div class="modal"><div class="annotation-modal-head"><h2>アノテーション一覧</h2><button type="button" class="modal-close-x" data-close="annotationsDialog" aria-label="閉じる" autofocus>×</button></div><label class="label" style="margin-bottom:12px">評価で絞り込み<select id="annotationFilter" class="field"><option value="">すべて</option><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select></label><div id="annotationList" class="anno-list"></div><div class="modal-actions"><button type="button" class="btn" data-close="annotationsDialog">閉じる</button></div></div></dialog>
+<dialog id="annotationEditDialog"><div class="modal"><h2>アノテーション編集</h2><div id="editAnnotationQuote" class="quote-box"></div><div class="form-grid" style="margin-top:12px"><label class="label">評価<select id="editAnnotationRating" class="field"><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select></label><label class="label">コメント<textarea id="editAnnotationComment" class="field"></textarea></label></div><div class="modal-actions"><button type="button" class="btn" data-close="annotationEditDialog">キャンセル</button><button type="button" class="btn primary" id="updateAnnotationBtn">保存</button></div><div class="danger-zone"><button type="button" class="btn danger" id="deleteAnnotationBtn">このアノテーションを削除</button></div></div></dialog>
 <div id="toast" class="toast"></div>
-
 <script>
 (() => {
-  'use strict';
-  const STORAGE_KEY = 'yumeAnnotationTool.v1';
-  const $ = id => document.getElementById(id);
-  const nowIso = () => new Date().toISOString();
-  const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-  const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const ratingLabel = r => ({'3':'❤️❤️❤️','2':'❤️❤️','1':'❤️','0':'△','-1':'❌'})[String(r)] ?? '';
-  const ratingClass = r => r === 3 ? 'r3' : r === 2 ? 'r2' : r === 1 ? 'r1' : r === 0 ? 'r0' : 'rn1';
-
-  let state = loadState();
-  let currentWorkId = null;
-  let pendingSelection = null;
-  let selectedRating = null;
-  let editingAnnotationId = null;
-  let notesTimer = null;
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { schema_version:1, works:[] };
-      const parsed = JSON.parse(raw);
-      return normalizeState(parsed);
-    } catch (e) {
-      console.error(e);
-      return { schema_version:1, works:[] };
-    }
-  }
-  function normalizeState(data) {
-    const works = Array.isArray(data?.works) ? data.works : [];
-    return { schema_version:1, works:works.map(w => ({
-      id:w.id || uid('work'), title:w.title || '', character:w.character || '', prompt_version:w.prompt_version === 'new' ? 'new' : 'old',
-      full_text:w.full_text || '', series:w.series || '', pair_id:w.pair_id || '', scenario:w.scenario || '', notes:w.notes || '',
-      created_at:w.created_at || nowIso(), updated_at:w.updated_at || nowIso(), annotations:Array.isArray(w.annotations) ? w.annotations.map(a => ({
-        id:a.id || uid('annotation'), work_id:w.id || '', quote:a.quote || '', start:Number(a.start)||0, end:Number(a.end)||0,
-        rating:[-1,0,1,2,3].includes(Number(a.rating)) ? Number(a.rating) : 0, comment:a.comment || '', created_at:a.created_at || nowIso(), updated_at:a.updated_at || nowIso()
-      })) : []
-    }))};
-  }
-  function saveState() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    catch (e) { alert('保存に失敗しました。Safariのストレージ容量をご確認ください。\n' + e.message); }
-  }
-  function toast(msg) {
-    const el = $('toast'); el.textContent = msg; el.classList.add('show');
-    clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 1800);
-  }
-  function getWork() { return state.works.find(w => w.id === currentWorkId) || null; }
-  function showView(name) {
-    $('listView').hidden = name !== 'list'; $('readerView').hidden = name !== 'reader'; $('bottomEval').hidden = name !== 'reader';
-  }
-
-  function renderList() {
-    const q = $('searchInput').value.trim().toLowerCase();
-    const char = $('characterFilter').value;
-    const ver = $('versionFilter').value;
-    const chars = [...new Set(state.works.map(w => w.character).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
-    const previous = $('characterFilter').value;
-    $('characterFilter').innerHTML = '<option value="">全キャラ</option>' + chars.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-    if (chars.includes(previous)) $('characterFilter').value = previous;
-    const filtered = state.works.filter(w => {
-      const hay = `${w.title} ${w.character} ${w.series}`.toLowerCase();
-      return (!q || hay.includes(q)) && (!char || w.character === char) && (!ver || w.prompt_version === ver);
-    }).sort((a,b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
-    const list = $('workList');
-    if (!filtered.length) { list.innerHTML = '<div class="empty">該当する作品がありません。<br>「＋ 新規作品」から本文を登録できます。</div>'; return; }
-    list.innerHTML = filtered.map(w => {
-      const anns = w.annotations || [], hi = anns.filter(a => a.rating >= 2).length, low = anns.filter(a => a.rating < 0).length;
-      return `<article class="card work-card" data-work-id="${escapeHtml(w.id)}">
-        <div class="card-head"><div><div class="card-title">${escapeHtml(w.title)}</div><div class="subtle">${escapeHtml(w.character)}${w.series ? ' ・ '+escapeHtml(w.series) : ''}</div></div><span class="badge ${w.prompt_version}">${w.prompt_version.toUpperCase()}</span></div>
-        <div class="stats"><span>注釈 ${anns.length}</span><span>高評価 ${hi}</span><span>低評価 ${low}</span></div>
-      </article>`;
-    }).join('');
-    list.querySelectorAll('[data-work-id]').forEach(el => el.addEventListener('click', () => openReader(el.dataset.workId)));
-  }
-
-  function openReader(id) {
-    currentWorkId = id; pendingSelection = null; window.getSelection()?.removeAllRanges();
-    const w = getWork(); if (!w) return;
-    $('readerTitle').textContent = w.title;
-    $('readerMeta').innerHTML = `<span class="badge ${w.prompt_version}">${w.prompt_version.toUpperCase()}</span><span class="badge">${escapeHtml(w.character)}</span>${w.series?`<span class="badge">${escapeHtml(w.series)}</span>`:''}`;
-    $('readerNotes').value = w.notes || '';
-    renderAnnotatedText(w);
-    $('selectionStatus').textContent = '本文を選択してください';
-    showView('reader'); window.scrollTo({top:0,behavior:'instant'});
-    requestAnimationFrame(syncBottomEvalToVisualViewport);
-  }
-
-  function renderAnnotatedText(w) {
-    const text = w.full_text || '';
-    const anns = [...(w.annotations || [])].filter(a => a.start >= 0 && a.end > a.start && a.end <= text.length && text.slice(a.start,a.end) === a.quote).sort((a,b)=>a.start-b.start || b.end-a.end);
-    let html='', pos=0;
-    for (const a of anns) {
-      if (a.start < pos) continue; // V1: overlapping annotations remain in data; earliest visible highlight wins.
-      html += escapeHtml(text.slice(pos,a.start));
-      html += `<mark id="ann-${escapeHtml(a.id)}" class="annotation ${ratingClass(a.rating)}" data-ann-id="${escapeHtml(a.id)}" title="${escapeHtml(ratingLabel(a.rating)+' '+(a.comment||''))}">${escapeHtml(text.slice(a.start,a.end))}</mark>`;
-      pos = a.end;
-    }
-    html += escapeHtml(text.slice(pos));
-    $('readerText').innerHTML = html;
-    $('readerText').querySelectorAll('[data-ann-id]').forEach(el => el.addEventListener('click', ev => { ev.stopPropagation(); openAnnotationEdit(el.dataset.annId); }));
-  }
-
-  function getSelectionOffsets() {
-    const root = $('readerText'); const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return null;
-    const range = sel.getRangeAt(0);
-    if (!root.contains(range.commonAncestorContainer)) return null;
-    const pre = document.createRange(); pre.selectNodeContents(root); pre.setEnd(range.startContainer, range.startOffset);
-    const start = pre.toString().length; const quote = range.toString(); const end = start + quote.length;
-    if (!quote.trim()) return null;
-    return { start, end, quote };
-  }
-
-  function syncBottomEvalToVisualViewport() {
-    const bar = $('bottomEval');
-    if (!bar || bar.hidden || $('readerView').hidden) return;
-    const vv = window.visualViewport;
-    if (!vv) {
-      document.documentElement.style.setProperty('--visual-bottom', '0px');
-      return;
-    }
-    // iOS Safariではテキスト選択時にvisual viewportだけが移動し、
-    // layout viewport基準のposition:fixedが一時的に画面外へずれることがある。
-    const layoutHeight = document.documentElement.clientHeight;
-    const hiddenBelow = Math.max(0, layoutHeight - (vv.offsetTop + vv.height));
-    // キーボード表示時などの極端な値はdialog側に任せ、読書画面では過剰に持ち上げない。
-    const correction = Math.min(hiddenBelow, 180);
-    document.documentElement.style.setProperty('--visual-bottom', `${correction}px`);
-  }
-
-  function ensureEvaluationBarVisible() {
-    if ($('readerView').hidden) return;
-    $('bottomEval').hidden = false;
-    syncBottomEvalToVisualViewport();
-    // Safariは選択UI確定後にviewportをもう一度動かす場合があるため追従を二段で行う。
-    requestAnimationFrame(syncBottomEvalToVisualViewport);
-    setTimeout(syncBottomEvalToVisualViewport, 80);
-    setTimeout(syncBottomEvalToVisualViewport, 220);
-  }
-
-  function refreshSelection() {
-    if ($('readerView').hidden) return;
-    const s = getSelectionOffsets(); pendingSelection = s;
-    $('selectionStatus').textContent = s ? `${s.quote.trim().slice(0,18)}${s.quote.trim().length>18?'…':''}` : '本文を選択してください';
-    if (s) ensureEvaluationBarVisible();
-  }
-  ['selectionchange'].forEach(evt => document.addEventListener(evt, () => setTimeout(refreshSelection, 0)));
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', syncBottomEvalToVisualViewport);
-    window.visualViewport.addEventListener('scroll', syncBottomEvalToVisualViewport);
-  }
-  window.addEventListener('orientationchange', () => setTimeout(syncBottomEvalToVisualViewport, 100));
-
-  $('evaluateSelectionBtn').addEventListener('click', () => {
-    const s = getSelectionOffsets() || pendingSelection;
-    if (!s) { toast('先に本文の範囲を選択してください'); return; }
-    pendingSelection = s; selectedRating = null;
-    $('annotationQuote').textContent = s.quote;
-    $('annotationComment').value='';
-    document.querySelectorAll('#ratingRow .rating-btn').forEach(b => b.classList.remove('selected'));
-    $('annotationDialog').showModal();
-  });
-  document.querySelectorAll('#ratingRow .rating-btn').forEach(btn => btn.addEventListener('click', () => {
-    selectedRating = Number(btn.dataset.rating);
-    document.querySelectorAll('#ratingRow .rating-btn').forEach(b => b.classList.toggle('selected', b === btn));
-  }));
-  function closeAnnotationDialog() {
-    // iPhone Safariではtextareaのフォーカス/キーボードがdialogのcloseと競合することがあるため、先にフォーカスを外す。
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    const dialog = $('annotationDialog');
-    if (dialog.open) dialog.close();
-    // 念のため次フレームでも確認する。通常は1回目で閉じる。
-    requestAnimationFrame(() => { if (dialog.open) dialog.close(); });
-  }
-
-  $('saveAnnotationBtn').addEventListener('click', () => {
-    const w = getWork(); if (!w || !pendingSelection) return;
-    if (selectedRating === null) { toast('評価を選んでください'); return; }
-    // Revalidate against original full text; offsets are plain-text offsets even after highlights exist.
-    const quote = w.full_text.slice(pendingSelection.start,pendingSelection.end);
-    if (quote !== pendingSelection.quote) { toast('選択位置が変わりました。もう一度選択してください'); closeAnnotationDialog(); return; }
-    const t = nowIso();
-    w.annotations.push({ id:uid('annotation'), work_id:w.id, quote, start:pendingSelection.start, end:pendingSelection.end, rating:selectedRating, comment:$('annotationComment').value.trim(), created_at:t, updated_at:t });
-    w.updated_at=t;
-    saveState();
-    closeAnnotationDialog();
-    window.getSelection()?.removeAllRanges();
-    pendingSelection=null;
-    renderAnnotatedText(w);
-    toast('アノテーションを保存しました');
-  });
-
-  function openAnnotationEdit(id) {
-    const w=getWork(), a=w?.annotations.find(x=>x.id===id); if(!a) return;
-    editingAnnotationId=id; $('editAnnotationQuote').textContent=a.quote; $('editAnnotationRating').value=String(a.rating); $('editAnnotationComment').value=a.comment||''; $('annotationEditDialog').showModal();
-  }
-  $('updateAnnotationBtn').addEventListener('click', () => {
-    const w=getWork(), a=w?.annotations.find(x=>x.id===editingAnnotationId); if(!a) return;
-    a.rating=Number($('editAnnotationRating').value); a.comment=$('editAnnotationComment').value.trim(); a.updated_at=nowIso(); w.updated_at=nowIso(); saveState(); $('annotationEditDialog').close(); renderAnnotatedText(w); renderAnnotationList(); toast('更新しました');
-  });
-  $('deleteAnnotationBtn').addEventListener('click', () => {
-    const w=getWork(); if(!w) return; const a=w.annotations.find(x=>x.id===editingAnnotationId); if(!a) return;
-    if(!confirm('このアノテーションを削除しますか？')) return;
-    w.annotations=w.annotations.filter(x=>x.id!==editingAnnotationId); w.updated_at=nowIso(); saveState(); $('annotationEditDialog').close(); renderAnnotatedText(w); renderAnnotationList(); toast('削除しました');
-  });
-
-  function renderAnnotationList() {
-    const w=getWork(); if(!w) return; const f=$('annotationFilter').value;
-    const items=[...(w.annotations||[])].filter(a=>f===''||String(a.rating)===f).sort((a,b)=>a.start-b.start);
-    $('annotationList').innerHTML = items.length ? items.map(a=>`<div class="anno-item">
-      <div><strong>${ratingLabel(a.rating)}</strong> <span class="subtle">${a.start}–${a.end}</span></div>
-      <div class="anno-quote">${escapeHtml(a.quote)}</div>
-      ${a.comment?`<div class="anno-comment">${escapeHtml(a.comment)}</div>`:''}
-      <div class="anno-actions"><button class="btn small" data-jump="${escapeHtml(a.id)}">本文へ</button><button class="btn small" data-edit-ann="${escapeHtml(a.id)}">編集</button></div>
-    </div>`).join('') : '<div class="empty">該当するアノテーションはありません。</div>';
-    $('annotationList').querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{
-      $('annotationsDialog').close(); const el=$(`ann-${b.dataset.jump}`); if(el){el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>openAnnotationEdit(b.dataset.jump),350);} else toast('重複範囲のため本文ハイライト非表示です');
-    }));
-    $('annotationList').querySelectorAll('[data-edit-ann]').forEach(b=>b.addEventListener('click',()=>openAnnotationEdit(b.dataset.editAnn)));
-  }
-  $('annotationsBtn').addEventListener('click',()=>{ $('annotationFilter').value=''; renderAnnotationList(); $('annotationsDialog').showModal(); });
-  $('annotationFilter').addEventListener('change',renderAnnotationList);
-
-  $('newWorkBtn').addEventListener('click',()=>{ $('newWorkChoiceDialog').showModal(); });
-  $('newWorkDirectBtn').addEventListener('click',()=>{ $('newWorkChoiceDialog').close(); openWorkDialog(); });
-  $('newWorkFileBtn').addEventListener('click',()=>{ $('newWorkTextFile').click(); });
-  $('newWorkTextFile').addEventListener('change', async e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const lower = file.name.toLowerCase();
-      if (!(lower.endsWith('.txt') || lower.endsWith('.md'))) throw new Error('対応形式は .txt / .md です。');
-      const text = await file.text();
-      if (!text.trim()) throw new Error('ファイルの本文が空です。');
-      const suggestedTitle = file.name.replace(/\.(txt|md)$/i, '');
-      $('newWorkChoiceDialog').close();
-      openWorkDialog(null, { title:suggestedTitle, full_text:text });
-      toast('本文を読み込みました');
-    } catch (err) {
-      alert('ファイルの読み込みに失敗しました。\n' + err.message);
-    } finally {
-      e.target.value = '';
-    }
-  });
-  $('workDialogFileBtn').addEventListener('click',()=>{ $('workDialogTextFile').click(); });
-  $('workDialogTextFile').addEventListener('change', async e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const lower = file.name.toLowerCase();
-      if (!(lower.endsWith('.txt') || lower.endsWith('.md'))) throw new Error('対応形式は .txt / .md です。');
-      const text = await file.text();
-      if (!text.trim()) throw new Error('ファイルの本文が空です。');
-      $('workText').value = text;
-      if (!$('workTitle').value.trim()) $('workTitle').value = file.name.replace(/\.(txt|md)$/i, '');
-      toast('本文を読み込みました');
-    } catch (err) {
-      alert('ファイルの読み込みに失敗しました。\n' + err.message);
-    } finally { e.target.value = ''; }
-  });
-
-  $('editWorkBtn').addEventListener('click',()=>openWorkDialog(getWork()));
-  function openWorkDialog(w=null, seed=null){
-    const source = w || seed || {};
-    $('workDialogTitle').textContent=w?'作品を編集':'作品を追加'; $('workId').value=w?.id||''; $('workTitle').value=source.title||''; $('workCharacter').value=source.character||''; $('workVersion').value=source.prompt_version||'old'; $('workSeries').value=source.series||''; $('workPair').value=source.pair_id||''; $('workScenario').value=source.scenario||''; $('workText').value=source.full_text||''; $('workDeleteArea').hidden=!w; $('workDialog').showModal();
-  }
-  $('workForm').addEventListener('submit',e=>{
-    e.preventDefault(); const id=$('workId').value; const existing=state.works.find(w=>w.id===id); const t=nowIso();
-    const payload={ title:$('workTitle').value.trim(), character:$('workCharacter').value.trim(), prompt_version:$('workVersion').value, series:$('workSeries').value.trim(), pair_id:$('workPair').value.trim(), scenario:$('workScenario').value.trim(), full_text:$('workText').value };
-    if(existing){
-      const textChanged=existing.full_text!==payload.full_text;
-      if(textChanged && existing.annotations.length && !confirm('本文を変更すると既存アノテーションの位置がずれる可能性があります。本文変更を保存しますか？')) return;
-      Object.assign(existing,payload,{updated_at:t});
-    } else state.works.push({id:uid('work'),...payload,notes:'',created_at:t,updated_at:t,annotations:[]});
-    saveState(); $('workDialog').close(); renderList(); if(existing){currentWorkId=existing.id; openReader(existing.id);} toast('作品を保存しました');
-  });
-  $('deleteWorkBtn').addEventListener('click',()=>{
-    const id=$('workId').value; const w=state.works.find(x=>x.id===id); if(!w) return;
-    if(!confirm(`「${w.title}」をアノテーションごと削除しますか？`)) return;
-    state.works=state.works.filter(x=>x.id!==id); saveState(); $('workDialog').close(); currentWorkId=null; showView('list'); renderList(); toast('作品を削除しました');
-  });
-
-  $('readerNotes').addEventListener('input',()=>{
-    clearTimeout(notesTimer); notesTimer=setTimeout(()=>{const w=getWork(); if(!w)return; w.notes=$('readerNotes').value; w.updated_at=nowIso(); saveState();},350);
-  });
-  $('backBtn').addEventListener('click',()=>{ const w=getWork(); if(w){w.notes=$('readerNotes').value; saveState();} currentWorkId=null; showView('list'); renderList(); });
-
-  function exportDataForLLM() {
-    return { schema_version:1, exported_at:nowIso(), works:state.works.map(w=>({ id:w.id,title:w.title,series:w.series,character:w.character,prompt_version:w.prompt_version,pair_id:w.pair_id,scenario:w.scenario,notes:w.notes,full_text:w.full_text,annotations:(w.annotations||[]).map(a=>({id:a.id,quote:a.quote,start:a.start,end:a.end,rating:a.rating,comment:a.comment,created_at:a.created_at,updated_at:a.updated_at})),created_at:w.created_at,updated_at:w.updated_at })) };
-  }
-  function download(filename, content, mime) {
-    const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }
-  $('exportJsonBtn').addEventListener('click',()=>download(`yume-annotations-${dateStamp()}.json`,JSON.stringify(exportDataForLLM(),null,2),'application/json;charset=utf-8'));
-  $('exportMdBtn').addEventListener('click',()=>download(`yume-annotations-${dateStamp()}.md`,toMarkdown(exportDataForLLM()),'text/markdown;charset=utf-8'));
-  $('importJsonBtn').addEventListener('click',()=>$('importFile').click());
-  $('importFile').addEventListener('change',async e=>{
-    const file=e.target.files?.[0]; if(!file)return;
-    try { const parsed=JSON.parse(await file.text()); const imported=normalizeState(parsed); if(!confirm(`JSONから ${imported.works.length} 作品を読み込みます。現在のデータは置き換わります。よろしいですか？`)) return; state=imported; saveState(); currentWorkId=null; showView('list'); renderList(); toast('JSONを読み込みました'); }
-    catch(err){alert('JSONの読み込みに失敗しました。\n'+err.message);} finally {e.target.value='';}
-  });
-  function toMarkdown(data){
-    const lines=['# 夢小説アノテーションデータ','',`- schema_version: ${data.schema_version}`,`- exported_at: ${data.exported_at}`,''];
-    data.works.forEach((w,i)=>{
-      lines.push(`## ${i+1}. ${w.title}`,'',`- キャラクター: ${w.character}`,`- 作品名: ${w.series||''}`,`- prompt_version: ${w.prompt_version}`,`- pair_id: ${w.pair_id||''}`,`- scenario: ${w.scenario||''}`,'', '### 全体メモ','',w.notes||'','', '### 本文全文','',w.full_text||'','', '### アノテーション一覧','');
-      if(!w.annotations.length) lines.push('（なし）','');
-      w.annotations.forEach((a,j)=>lines.push(`#### ${j+1}. ${ratingLabel(a.rating)} / ${a.start}–${a.end}`,'',`> ${String(a.quote).replace(/\n/g,'\n> ')}`,'',`- 評価値: ${a.rating}`,`- コメント: ${a.comment||''}`,'',));
-      lines.push('---','');
-    }); return lines.join('\n');
-  }
-  function dateStamp(){return new Date().toISOString().slice(0,10);}
-
-  ['newWorkChoiceDialog','workDialog','annotationDialog','annotationsDialog','annotationEditDialog'].forEach(id => {
-    document.querySelectorAll(`[data-close="${id}"]`).forEach(b=>b.addEventListener('click',()=>$(id).close()));
-    $(id).addEventListener('click',e=>{ const r=$(id).getBoundingClientRect(); if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) $(id).close(); });
-  });
-  $('searchInput').addEventListener('input',renderList); $('characterFilter').addEventListener('change',renderList); $('versionFilter').addEventListener('change',renderList);
-
-  // Demo-free initial state: user's own data only.
-  renderList(); showView('list');
+'use strict';
+const STORAGE_KEY='yumeAnnotationTool.v1',$=id=>document.getElementById(id),nowIso=()=>new Date().toISOString(),uid=p=>`${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ratingLabel=r=>({'3':'❤️❤️❤️','2':'❤️❤️','1':'❤️','0':'△','-1':'❌'})[String(r)]??'',ratingClass=r=>r===3?'r3':r===2?'r2':r===1?'r1':r===0?'r0':'rn1';
+let state=loadState(),currentWorkId=null,pendingSelection=null,selectedRating=null,editingAnnotationId=null,notesTimer=null;
+function normalizeState(data){const works=Array.isArray(data?.works)?data.works:[];return{schema_version:1,works:works.map(w=>({id:w.id||uid('work'),title:w.title||'',character:w.character||'',prompt_version:w.prompt_version==='new'?'new':'old',full_text:w.full_text||'',series:w.series||'',pair_id:w.pair_id||'',scenario:w.scenario||'',notes:w.notes||'',created_at:w.created_at||nowIso(),updated_at:w.updated_at||nowIso(),annotations:Array.isArray(w.annotations)?w.annotations.map(a=>({id:a.id||uid('annotation'),work_id:w.id||'',quote:a.quote||'',start:Number(a.start)||0,end:Number(a.end)||0,rating:[-1,0,1,2,3].includes(Number(a.rating))?Number(a.rating):0,comment:a.comment||'',created_at:a.created_at||nowIso(),updated_at:a.updated_at||nowIso()})):[]}))};}
+function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);return raw?normalizeState(JSON.parse(raw)):{schema_version:1,works:[]};}catch(e){console.error(e);return{schema_version:1,works:[]};}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch(e){alert('保存に失敗しました。Safariのストレージ容量をご確認ください。\n'+e.message);return false;}}
+function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),1800);}
+function getWork(){return state.works.find(w=>w.id===currentWorkId)||null;}
+function showView(n){$('listView').hidden=n!=='list';$('readerView').hidden=n!=='reader';$('bottomEval').hidden=n!=='reader';if(n==='reader')setTimeout(placeEvalBar,0);}
+function renderList(){const q=$('searchInput').value.trim().toLowerCase(),char=$('characterFilter').value,ver=$('versionFilter').value,chars=[...new Set(state.works.map(w=>w.character).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')),prev=$('characterFilter').value;$('characterFilter').innerHTML='<option value="">全キャラ</option>'+chars.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');if(chars.includes(prev))$('characterFilter').value=prev;const filtered=state.works.filter(w=>{const hay=`${w.title} ${w.character} ${w.series}`.toLowerCase();return(!q||hay.includes(q))&&(!char||w.character===char)&&(!ver||w.prompt_version===ver)}).sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||''));$('workList').innerHTML=filtered.length?filtered.map(w=>{const a=w.annotations||[],hi=a.filter(x=>x.rating>=2).length,lo=a.filter(x=>x.rating<0).length;return`<article class="card work-card" data-work-id="${escapeHtml(w.id)}"><div class="card-head"><div><div class="card-title">${escapeHtml(w.title)}</div><div class="subtle">${escapeHtml(w.character)}${w.series?' ・ '+escapeHtml(w.series):''}</div></div><span class="badge ${w.prompt_version}">${w.prompt_version.toUpperCase()}</span></div><div class="stats"><span>注釈 ${a.length}</span><span>高評価 ${hi}</span><span>低評価 ${lo}</span></div></article>`}).join(''):'<div class="empty">該当する作品がありません。<br>「＋ 新規作品」から本文を登録できます。</div>';$('workList').querySelectorAll('[data-work-id]').forEach(e=>e.addEventListener('click',()=>openReader(e.dataset.workId)));}
+function openReader(id){currentWorkId=id;pendingSelection=null;window.getSelection()?.removeAllRanges();const w=getWork();if(!w)return;$('readerTitle').textContent=w.title;$('readerMeta').innerHTML=`<span class="badge ${w.prompt_version}">${w.prompt_version.toUpperCase()}</span><span class="badge">${escapeHtml(w.character)}</span>${w.series?`<span class="badge">${escapeHtml(w.series)}</span>`:''}`;$('readerNotes').value=w.notes||'';renderAnnotatedText(w);$('selectionStatus').textContent='本文を選択してください';showView('reader');window.scrollTo({top:0,behavior:'instant'});setTimeout(placeEvalBar,20);}
+function renderAnnotatedText(w){const text=w.full_text||'',anns=[...(w.annotations||[])].filter(a=>a.start>=0&&a.end>a.start&&a.end<=text.length&&text.slice(a.start,a.end)===a.quote).sort((a,b)=>a.start-b.start||b.end-a.end);let html='',pos=0;for(const a of anns){if(a.start<pos)continue;html+=escapeHtml(text.slice(pos,a.start));html+=`<mark id="ann-${escapeHtml(a.id)}" class="annotation ${ratingClass(a.rating)}" data-ann-id="${escapeHtml(a.id)}">${escapeHtml(text.slice(a.start,a.end))}</mark>`;pos=a.end;}html+=escapeHtml(text.slice(pos));$('readerText').innerHTML=html;$('readerText').querySelectorAll('[data-ann-id]').forEach(e=>e.addEventListener('click',ev=>{ev.stopPropagation();openAnnotationEdit(e.dataset.annId);}));}
+function getSelectionOffsets(){const root=$('readerText'),sel=window.getSelection();if(!sel||!sel.rangeCount||sel.isCollapsed)return null;const r=sel.getRangeAt(0);if(!root.contains(r.commonAncestorContainer))return null;const pre=document.createRange();pre.selectNodeContents(root);pre.setEnd(r.startContainer,r.startOffset);const start=pre.toString().length,quote=r.toString(),end=start+quote.length;return quote.trim()?{start,end,quote}:null;}
+function placeEvalBar(){const bar=$('bottomEval');if(!bar||bar.hidden||$('readerView').hidden)return;const vv=window.visualViewport,pageTop=vv?vv.pageTop:window.scrollY,height=vv?vv.height:window.innerHeight,h=bar.offsetHeight||72;bar.style.position='absolute';bar.style.bottom='auto';bar.style.top=`${Math.max(0,pageTop+height-h)}px`;bar.style.left='0';bar.style.right='0';}
+function refreshSelection(){if($('readerView').hidden||$('annotationDialog').open)return;const s=getSelectionOffsets();if(s)pendingSelection=s;$('selectionStatus').textContent=s?`${s.quote.trim().slice(0,18)}${s.quote.trim().length>18?'…':''}`:'本文を選択してください';$('bottomEval').hidden=false;placeEvalBar();requestAnimationFrame(placeEvalBar);setTimeout(placeEvalBar,80);setTimeout(placeEvalBar,220);}
+document.addEventListener('selectionchange',()=>setTimeout(refreshSelection,0));document.addEventListener('touchend',()=>setTimeout(refreshSelection,50),{passive:true});document.addEventListener('pointerup',()=>setTimeout(refreshSelection,20));window.addEventListener('scroll',placeEvalBar,{passive:true});window.visualViewport?.addEventListener('resize',placeEvalBar);window.visualViewport?.addEventListener('scroll',placeEvalBar);
+$('evaluateSelectionBtn').addEventListener('click',()=>{const s=getSelectionOffsets()||pendingSelection;if(!s){toast('先に本文の範囲を選択してください');return;}pendingSelection={...s};selectedRating=null;$('annotationQuote').textContent=s.quote;$('annotationComment').value='';document.querySelectorAll('#ratingRow .rating-btn').forEach(b=>b.classList.remove('selected'));$('annotationDialog').showModal();requestAnimationFrame(()=>{const b=$('annotationDialog').querySelector('.modal-close-x');try{b?.focus({preventScroll:true})}catch{b?.focus()}});});
+document.querySelectorAll('#ratingRow .rating-btn').forEach(btn=>btn.addEventListener('click',()=>{selectedRating=Number(btn.dataset.rating);document.querySelectorAll('#ratingRow .rating-btn').forEach(b=>b.classList.toggle('selected',b===btn));}));
+function closeAnnotationDialog(){if(document.activeElement instanceof HTMLElement)document.activeElement.blur();if($('annotationDialog').open)$('annotationDialog').close();}
+$('saveAnnotationBtn').addEventListener('click',()=>{const w=getWork();if(!w){toast('作品を読み込めませんでした');return;}if(!pendingSelection){toast('選択範囲が失われました。もう一度本文を選択してください');return;}if(selectedRating===null){toast('評価を選んでください');return;}const s={...pendingSelection},quote=w.full_text.slice(s.start,s.end);if(quote!==s.quote){toast('選択位置が変わりました。もう一度選択してください');closeAnnotationDialog();return;}const t=nowIso();w.annotations.push({id:uid('annotation'),work_id:w.id,quote,start:s.start,end:s.end,rating:selectedRating,comment:$('annotationComment').value.trim(),created_at:t,updated_at:t});w.updated_at=t;if(!saveState())return;closeAnnotationDialog();window.getSelection()?.removeAllRanges();pendingSelection=null;renderAnnotatedText(w);$('selectionStatus').textContent='本文を選択してください';placeEvalBar();toast('アノテーションを保存しました');});
+function openAnnotationEdit(id){const w=getWork(),a=w?.annotations.find(x=>x.id===id);if(!a)return;editingAnnotationId=id;$('editAnnotationQuote').textContent=a.quote;$('editAnnotationRating').value=String(a.rating);$('editAnnotationComment').value=a.comment||'';$('annotationEditDialog').showModal();}
+$('updateAnnotationBtn').addEventListener('click',()=>{const w=getWork(),a=w?.annotations.find(x=>x.id===editingAnnotationId);if(!a)return;a.rating=Number($('editAnnotationRating').value);a.comment=$('editAnnotationComment').value.trim();a.updated_at=nowIso();w.updated_at=nowIso();if(!saveState())return;$('annotationEditDialog').close();renderAnnotatedText(w);renderAnnotationList();toast('更新しました');});
+$('deleteAnnotationBtn').addEventListener('click',()=>{const w=getWork(),a=w?.annotations.find(x=>x.id===editingAnnotationId);if(!a||!confirm('このアノテーションを削除しますか？'))return;w.annotations=w.annotations.filter(x=>x.id!==editingAnnotationId);w.updated_at=nowIso();saveState();$('annotationEditDialog').close();renderAnnotatedText(w);renderAnnotationList();toast('削除しました');});
+function renderAnnotationList(){const w=getWork();if(!w)return;const f=$('annotationFilter').value,items=[...(w.annotations||[])].filter(a=>f===''||String(a.rating)===f).sort((a,b)=>a.start-b.start);$('annotationList').innerHTML=items.length?items.map(a=>`<div class="anno-item"><div><strong>${ratingLabel(a.rating)}</strong> <span class="subtle">${a.start}–${a.end}</span></div><div class="anno-quote">${escapeHtml(a.quote)}</div>${a.comment?`<div class="anno-comment">${escapeHtml(a.comment)}</div>`:''}<div class="anno-actions"><button class="btn small" data-jump="${escapeHtml(a.id)}">本文へ</button><button class="btn small" data-edit-ann="${escapeHtml(a.id)}">編集</button></div></div>`).join(''):'<div class="empty">該当するアノテーションはありません。</div>';$('annotationList').querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{$('annotationsDialog').close();const e=$(`ann-${b.dataset.jump}`);if(e)e.scrollIntoView({behavior:'smooth',block:'center'});}));$('annotationList').querySelectorAll('[data-edit-ann]').forEach(b=>b.addEventListener('click',()=>openAnnotationEdit(b.dataset.editAnn)));}
+$('annotationsBtn').addEventListener('click',()=>{$('annotationFilter').value='';renderAnnotationList();$('annotationsDialog').showModal();requestAnimationFrame(()=>{const b=$('annotationsDialog').querySelector('.modal-close-x');try{b?.focus({preventScroll:true})}catch{b?.focus()}});});$('annotationFilter').addEventListener('change',renderAnnotationList);
+$('newWorkBtn').addEventListener('click',()=>$('newWorkChoiceDialog').showModal());$('newWorkDirectBtn').addEventListener('click',()=>{$('newWorkChoiceDialog').close();openWorkDialog();});$('newWorkFileBtn').addEventListener('click',()=>$('newWorkTextFile').click());
+async function importTextFile(file,targetTitle=true){const low=file.name.toLowerCase();if(!(low.endsWith('.txt')||low.endsWith('.md')))throw new Error('対応形式は .txt / .md です。');const text=await file.text();if(!text.trim())throw new Error('ファイルの本文が空です。');if(targetTitle&&!$('workTitle').value.trim())$('workTitle').value=file.name.replace(/\.(txt|md)$/i,'');$('workText').value=text;}
+$('newWorkTextFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const text=await f.text();if(!text.trim())throw new Error('ファイルの本文が空です。');$('newWorkChoiceDialog').close();openWorkDialog(null,{title:f.name.replace(/\.(txt|md)$/i,''),full_text:text});toast('本文を読み込みました');}catch(err){alert(err.message)}finally{e.target.value='';}});$('workDialogFileBtn').addEventListener('click',()=>$('workDialogTextFile').click());$('workDialogTextFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{await importTextFile(f);toast('本文を読み込みました')}catch(err){alert(err.message)}finally{e.target.value='';}});
+$('editWorkBtn').addEventListener('click',()=>openWorkDialog(getWork()));function openWorkDialog(w=null,seed=null){const s=w||seed||{};$('workDialogTitle').textContent=w?'作品を編集':'作品を追加';$('workId').value=w?.id||'';$('workTitle').value=s.title||'';$('workCharacter').value=s.character||'';$('workVersion').value=s.prompt_version||'old';$('workSeries').value=s.series||'';$('workPair').value=s.pair_id||'';$('workScenario').value=s.scenario||'';$('workText').value=s.full_text||'';$('workDeleteArea').hidden=!w;$('workDialog').showModal();}
+$('workForm').addEventListener('submit',e=>{e.preventDefault();const id=$('workId').value,ex=state.works.find(w=>w.id===id),t=nowIso(),payload={title:$('workTitle').value.trim(),character:$('workCharacter').value.trim(),prompt_version:$('workVersion').value,series:$('workSeries').value.trim(),pair_id:$('workPair').value.trim(),scenario:$('workScenario').value.trim(),full_text:$('workText').value};if(ex){if(ex.full_text!==payload.full_text&&ex.annotations.length&&!confirm('本文を変更すると既存アノテーションの位置がずれる可能性があります。本文変更を保存しますか？'))return;Object.assign(ex,payload,{updated_at:t});}else state.works.push({id:uid('work'),...payload,notes:'',created_at:t,updated_at:t,annotations:[]});if(!saveState())return;$('workDialog').close();renderList();if(ex){currentWorkId=ex.id;openReader(ex.id)}toast('作品を保存しました');});
+$('deleteWorkBtn').addEventListener('click',()=>{const id=$('workId').value,w=state.works.find(x=>x.id===id);if(!w||!confirm(`「${w.title}」をアノテーションごと削除しますか？`))return;state.works=state.works.filter(x=>x.id!==id);saveState();$('workDialog').close();currentWorkId=null;showView('list');renderList();toast('作品を削除しました');});
+$('readerNotes').addEventListener('input',()=>{clearTimeout(notesTimer);notesTimer=setTimeout(()=>{const w=getWork();if(!w)return;w.notes=$('readerNotes').value;w.updated_at=nowIso();saveState();},350)});$('backBtn').addEventListener('click',()=>{const w=getWork();if(w){w.notes=$('readerNotes').value;saveState()}currentWorkId=null;showView('list');renderList();});
+function exportData(){return{schema_version:1,exported_at:nowIso(),works:state.works.map(w=>({...w,annotations:(w.annotations||[]).map(a=>({...a}))}))};}function download(name,content,mime){const blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}function stamp(){return new Date().toISOString().slice(0,10)}
+$('exportJsonBtn').addEventListener('click',()=>download(`yume-annotations-${stamp()}.json`,JSON.stringify(exportData(),null,2),'application/json;charset=utf-8'));$('exportMdBtn').addEventListener('click',()=>download(`yume-annotations-${stamp()}.md`,toMarkdown(exportData()),'text/markdown;charset=utf-8'));$('importJsonBtn').addEventListener('click',()=>$('importFile').click());$('importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const d=normalizeState(JSON.parse(await f.text()));if(!confirm(`JSONから ${d.works.length} 作品を読み込みます。現在のデータは置き換わります。よろしいですか？`))return;state=d;saveState();currentWorkId=null;showView('list');renderList();toast('JSONを読み込みました')}catch(err){alert('JSONの読み込みに失敗しました。\n'+err.message)}finally{e.target.value='';}});
+function toMarkdown(d){const l=['# 夢小説アノテーションデータ','',`- schema_version: ${d.schema_version}`,`- exported_at: ${d.exported_at}`,''];d.works.forEach((w,i)=>{l.push(`## ${i+1}. ${w.title}`,'',`- キャラクター: ${w.character}`,`- 作品名: ${w.series||''}`,`- prompt_version: ${w.prompt_version}`,`- pair_id: ${w.pair_id||''}`,`- scenario: ${w.scenario||''}`,'','### 全体メモ','',w.notes||'','','### 本文全文','',w.full_text||'','','### アノテーション一覧','');if(!(w.annotations||[]).length)l.push('（なし）','');(w.annotations||[]).forEach((a,j)=>l.push(`#### ${j+1}. ${ratingLabel(a.rating)} / ${a.start}–${a.end}`,'',`> ${String(a.quote).replace(/\n/g,'\n> ')}`,'',`- 評価値: ${a.rating}`,`- コメント: ${a.comment||''}`,''));l.push('---','')});return l.join('\n')}
+['newWorkChoiceDialog','workDialog','annotationDialog','annotationsDialog','annotationEditDialog'].forEach(id=>{document.querySelectorAll(`[data-close="${id}"]`).forEach(b=>b.addEventListener('click',()=>$(id).close()));$(id).addEventListener('click',e=>{const r=$(id).getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$(id).close();});});$('searchInput').addEventListener('input',renderList);$('characterFilter').addEventListener('change',renderList);$('versionFilter').addEventListener('change',renderList);renderList();showView('list');
 })();
 </script>
 </body>
