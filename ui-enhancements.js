@@ -43,11 +43,13 @@
         .slice(0, 12);
 
       if (!matches.length) {
+        popup.replaceChildren();
         close();
         return;
       }
 
-      popup.innerHTML = matches.map(value => {
+      const fragment = document.createDocumentFragment();
+      for (const value of matches) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'site-suggestion-item';
@@ -64,12 +66,12 @@
           close();
           input.blur();
         });
-        return button;
-      }).reduce((fragment, button) => {
         fragment.appendChild(button);
-        return fragment;
-      }, document.createDocumentFragment());
+      }
 
+      // Important: append the DocumentFragment as DOM nodes. Assigning it to
+      // innerHTML stringifies it as "[object DocumentFragment]".
+      popup.replaceChildren(fragment);
       popup.hidden = false;
     };
 
