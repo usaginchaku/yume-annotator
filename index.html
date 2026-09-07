@@ -68,6 +68,15 @@
   dialog::backdrop { background:rgba(36,28,25,.42); backdrop-filter:blur(2px); }
   .modal { padding:18px; background:var(--panel); }
   .modal h2 { font-size:20px; margin-bottom:14px; }
+  .annotation-modal-head {
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
+  }
+  .annotation-modal-head h2 { margin:0; }
+  .modal-close-x {
+    flex:0 0 auto; width:44px; height:44px; min-height:44px; padding:0; display:grid; place-items:center;
+    border:0; background:transparent; color:var(--muted); border-radius:999px; font-size:30px; line-height:1; cursor:pointer;
+  }
+  .modal-close-x:active { background:#f2ece8; }
   .form-grid { display:grid; gap:12px; }
   .label { display:grid; gap:6px; color:#514843; font-size:13px; font-weight:700; }
   textarea.field { min-height:130px; resize:vertical; }
@@ -258,7 +267,10 @@
 </div></dialog>
 
 <dialog id="annotationDialog"><div class="modal">
-  <h2 id="annotationDialogTitle">この部分を評価</h2>
+  <div class="annotation-modal-head">
+    <h2 id="annotationDialogTitle">この部分を評価</h2>
+    <button type="button" class="modal-close-x" data-close="annotationDialog" aria-label="閉じる">×</button>
+  </div>
   <div id="annotationQuote" class="quote-box"></div>
   <div class="form-grid" style="margin-top:12px">
     <label class="label">評価
@@ -434,15 +446,30 @@
     selectedRating = Number(btn.dataset.rating);
     document.querySelectorAll('#ratingRow .rating-btn').forEach(b => b.classList.toggle('selected', b === btn));
   }));
+  function closeAnnotationDialog() {
+    // iPhone Safariではtextareaのフォーカス/キーボードがdialogのcloseと競合することがあるため、先にフォーカスを外す。
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    const dialog = $('annotationDialog');
+    if (dialog.open) dialog.close();
+    // 念のため次フレームでも確認する。通常は1回目で閉じる。
+    requestAnimationFrame(() => { if (dialog.open) dialog.close(); });
+  }
+
   $('saveAnnotationBtn').addEventListener('click', () => {
     const w = getWork(); if (!w || !pendingSelection) return;
     if (selectedRating === null) { toast('評価を選んでください'); return; }
     // Revalidate against original full text; offsets are plain-text offsets even after highlights exist.
     const quote = w.full_text.slice(pendingSelection.start,pendingSelection.end);
-    if (quote !== pendingSelection.quote) { toast('選択位置が変わりました。もう一度選択してください'); $('annotationDialog').close(); return; }
+    if (quote !== pendingSelection.quote) { toast('選択位置が変わりました。もう一度選択してください'); closeAnnotationDialog(); return; }
     const t = nowIso();
     w.annotations.push({ id:uid('annotation'), work_id:w.id, quote, start:pendingSelection.start, end:pendingSelection.end, rating:selectedRating, comment:$('annotationComment').value.trim(), created_at:t, updated_at:t });
-    w.updated_at=t; saveState(); $('annotationDialog').close(); window.getSelection()?.removeAllRanges(); pendingSelection=null; renderAnnotatedText(w); toast('アノテーションを保存しました');
+    w.updated_at=t;
+    saveState();
+    closeAnnotationDialog();
+    window.getSelection()?.removeAllRanges();
+    pendingSelection=null;
+    renderAnnotatedText(w);
+    toast('アノテーションを保存しました');
   });
 
   function openAnnotationEdit(id) {
