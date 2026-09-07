@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<title>夢小説アノテーションツール Ver. 1.6</title>
+<title>夢小説アノテーションツール Ver. 1.7</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.6</span></div>
+    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.7</span></div>
     <div class="top-actions">
       <button class="btn small" id="exportJsonBtn">JSON<span class="label-text">出力</span></button>
       <button class="btn small" id="importJsonBtn">JSON<span class="label-text">読込</span></button>
@@ -23,7 +23,10 @@
   <main>
     <section id="listView" class="view">
       <div class="hero">
-        <div><h1>作品一覧</h1><div class="subtle">本文を読みながら「萌え／萎え」をその場で記録します。</div></div>
+        <div>
+          <h1>作品一覧</h1>
+          <div class="subtle">本文を読みながら「萌え／萎え」をその場で記録します。</div>
+        </div>
         <button class="btn primary" id="newWorkBtn">＋ 新規作品</button>
       </div>
       <div class="toolbar">
@@ -47,9 +50,7 @@
           <button class="btn small" id="editWorkBtn">作品情報を編集</button>
           <button class="btn small" id="annotationsBtn">アノテーション一覧</button>
         </div>
-        <label class="label">全体メモ
-          <textarea id="readerNotes" class="field work-note" placeholder="作品全体への感想・比較メモなど"></textarea>
-        </label>
+        <label class="label">全体メモ<textarea id="readerNotes" class="field work-note" placeholder="作品全体への感想・比較メモなど"></textarea></label>
       </div>
       <div class="text-wrap"><div id="readerText"></div></div>
     </section>
@@ -63,102 +64,115 @@
   </div>
 </div>
 
-<dialog id="newWorkChoiceDialog"><div class="modal">
-  <h2>新規作品を追加</h2>
-  <div class="form-grid">
-    <button type="button" class="btn primary" id="newWorkDirectBtn">直接入力</button>
-    <button type="button" class="btn" id="newWorkFileBtn">ファイルから読み込み（複数可）</button>
-    <div class="subtle">.txt / .md の本文を読み込み、作品情報を入力して保存できます。</div>
-    <input id="newWorkTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md" multiple>
-  </div>
-  <div class="modal-actions">
-    <button type="button" class="btn" data-close="newWorkChoiceDialog">キャンセル</button>
-  </div>
-</div></dialog>
-
-<dialog id="workDialog"><div class="modal">
-  <div class="work-modal-head">
-    <button type="button" class="btn small ghost" data-close="workDialog" aria-label="閉じる" autofocus>←</button>
-    <h2 id="workDialogTitle">作品を追加</h2>
-    <button type="button" class="btn small" id="workDialogFileBtn">ファイルから読み込み</button>
-    <input id="workDialogTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md">
-  </div>
-  <form id="workForm">
-    <div class="work-fields">
-      <input type="hidden" id="workId">
-      <label class="label">タイトル *<input class="field" id="workTitle" required></label>
-      <label class="label">キャラクター *<input class="field" id="workCharacter" list="characterSuggestions" autocomplete="off" required></label>
-      <label class="label">プロンプト種別 *<select class="field" id="workVersion" required><option value="old">OLD</option><option value="new">NEW</option></select></label>
-      <label class="label">作品名 / シリーズ<input class="field" id="workSeries" list="seriesSuggestions" autocomplete="off"></label>
-      <details>
-        <summary>詳細設定（任意）</summary>
-        <div class="form-grid" style="margin-top:12px">
-          <label class="label">比較ペアID（任意）<input class="field" id="workPair" list="pairSuggestions" autocomplete="off" placeholder="例: dio-001"></label>
-          <label class="label">シチュエーション（任意）<input class="field" id="workScenario"></label>
-        </div>
-      </details>
-      <label class="label">本文 *<textarea class="field" id="workText" required></textarea></label>
-      <datalist id="characterSuggestions"></datalist>
-      <datalist id="seriesSuggestions"></datalist>
-      <datalist id="pairSuggestions"></datalist>
+<dialog id="newWorkChoiceDialog">
+  <div class="modal">
+    <h2>新規作品を追加</h2>
+    <div class="form-grid">
+      <button type="button" class="btn primary" id="newWorkDirectBtn">直接入力</button>
+      <button type="button" class="btn" id="newWorkFileBtn">ファイルから読み込み</button>
+      <div class="subtle">.txt / .md を1件または複数選択できます。複数選択時は1件ずつ確認しながら登録します。</div>
+      <input id="newWorkTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md" multiple>
     </div>
-    <div class="work-actions">
-      <button type="button" class="btn" data-close="workDialog">キャンセル</button>
-      <button type="submit" class="btn primary">保存</button>
-    </div>
-  </form>
-  <div id="workDeleteArea" class="danger-zone" hidden><button id="deleteWorkBtn" class="btn danger">この作品を削除</button></div>
-</div></dialog>
-
-<dialog id="annotationDialog" tabindex="-1"><div class="modal">
-  <div class="annotation-modal-head">
-    <h2 id="annotationDialogTitle">この部分を評価</h2>
-    <button type="button" class="modal-close-x" data-close="annotationDialog" aria-label="閉じる" autofocus>×</button>
+    <div class="modal-actions"><button type="button" class="btn" data-close="newWorkChoiceDialog">キャンセル</button></div>
   </div>
-  <div id="annotationQuote" class="quote-box"></div>
-  <div class="form-grid" style="margin-top:12px">
-    <label class="label">評価
-      <div class="rating-row" id="ratingRow">
-        <button type="button" class="rating-btn" data-rating="3" aria-label="死ぬほど好き">❤️❤️❤️</button>
-        <button type="button" class="rating-btn" data-rating="2" aria-label="かなり好き">❤️❤️</button>
-        <button type="button" class="rating-btn" data-rating="1" aria-label="好き">❤️</button>
-        <button type="button" class="rating-btn" data-rating="0" aria-label="普通・気になる">△</button>
-        <button type="button" class="rating-btn" data-rating="-1" aria-label="萎え・嫌い">❌</button>
+</dialog>
+
+<dialog id="workDialog">
+  <div class="modal">
+    <div class="work-modal-head">
+      <button type="button" class="btn small ghost" data-close="workDialog" aria-label="閉じる">←</button>
+      <h2 id="workDialogTitle">作品を追加</h2>
+      <button type="button" class="btn small" id="workDialogFileBtn">ファイルから読み込み</button>
+      <input id="workDialogTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md">
+    </div>
+    <form id="workForm">
+      <div class="work-fields">
+        <input type="hidden" id="workId">
+        <label class="label">タイトル *<input class="field" id="workTitle" required></label>
+        <label class="label">キャラクター *<input class="field" id="workCharacter" list="characterSuggestions" required></label>
+        <datalist id="characterSuggestions"></datalist>
+        <label class="label">プロンプト種別 *
+          <select class="field" id="workVersion" required><option value="old">OLD</option><option value="new">NEW</option></select>
+        </label>
+        <label class="label">作品名 / シリーズ<input class="field" id="workSeries" list="seriesSuggestions"></label>
+        <datalist id="seriesSuggestions"></datalist>
+        <details>
+          <summary>詳細設定（任意）</summary>
+          <div class="form-grid" style="margin-top:12px">
+            <label class="label">比較ペアID（任意）<input class="field" id="workPair" list="pairSuggestions" placeholder="例: DIO-001"></label>
+            <datalist id="pairSuggestions"></datalist>
+            <label class="label">シチュエーション（任意）<input class="field" id="workScenario"></label>
+          </div>
+        </details>
+        <label class="label">本文 *<textarea class="field" id="workText" required></textarea></label>
       </div>
+      <div class="work-actions">
+        <button type="button" class="btn" data-close="workDialog">キャンセル</button>
+        <button type="submit" class="btn primary">保存</button>
+      </div>
+    </form>
+    <div id="workDeleteArea" class="danger-zone" hidden><button id="deleteWorkBtn" class="btn danger">この作品を削除</button></div>
+  </div>
+</dialog>
+
+<dialog id="annotationDialog" tabindex="-1">
+  <div class="modal">
+    <div class="annotation-modal-head">
+      <h2>この部分を評価</h2>
+      <button type="button" class="modal-close-x" data-close="annotationDialog" aria-label="閉じる" autofocus>×</button>
+    </div>
+    <div id="annotationQuote" class="quote-box"></div>
+    <div class="form-grid" style="margin-top:12px">
+      <label class="label">評価
+        <div class="rating-row" id="ratingRow">
+          <button type="button" class="rating-btn" data-rating="3">❤️❤️❤️</button>
+          <button type="button" class="rating-btn" data-rating="2">❤️❤️</button>
+          <button type="button" class="rating-btn" data-rating="1">❤️</button>
+          <button type="button" class="rating-btn" data-rating="0">△</button>
+          <button type="button" class="rating-btn" data-rating="-1">❌</button>
+        </div>
+      </label>
+      <label class="label">コメント（空欄可）<textarea id="annotationComment" class="field" placeholder="承太郎すぎる、ここ最高、展開が早い…"></textarea></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" data-close="annotationDialog">キャンセル</button>
+      <button type="button" class="btn primary" id="saveAnnotationBtn">保存</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="annotationsDialog" tabindex="-1">
+  <div class="modal">
+    <div class="annotation-modal-head">
+      <h2>アノテーション一覧</h2>
+      <button type="button" class="modal-close-x" data-close="annotationsDialog" aria-label="閉じる" autofocus>×</button>
+    </div>
+    <label class="label" style="margin-bottom:12px">評価で絞り込み
+      <select id="annotationFilter" class="field">
+        <option value="">すべて</option><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option>
+      </select>
     </label>
-    <label class="label">コメント（空欄可）<textarea id="annotationComment" class="field" readonly tabindex="-1" placeholder="承太郎すぎる、ここ最高、展開が早い…"></textarea></label>
+    <div id="annotationList" class="anno-list"></div>
+    <div class="modal-actions"><button type="button" class="btn" data-close="annotationsDialog">閉じる</button></div>
   </div>
-  <div class="modal-actions">
-    <button type="button" class="btn" data-close="annotationDialog">キャンセル</button>
-    <button type="button" class="btn primary" id="saveAnnotationBtn">保存</button>
-  </div>
-</div></dialog>
+</dialog>
 
-<dialog id="annotationsDialog" tabindex="-1"><div class="modal">
-  <div class="annotation-modal-head">
-    <h2>アノテーション一覧</h2>
-    <button type="button" class="modal-close-x" data-close="annotationsDialog" aria-label="閉じる" autofocus>×</button>
+<dialog id="annotationEditDialog">
+  <div class="modal">
+    <h2>アノテーション編集</h2>
+    <div id="editAnnotationQuote" class="quote-box"></div>
+    <div class="form-grid" style="margin-top:12px">
+      <label class="label">評価
+        <select id="editAnnotationRating" class="field"><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select>
+      </label>
+      <label class="label">コメント<textarea id="editAnnotationComment" class="field"></textarea></label>
+    </div>
+    <div class="modal-actions"><button type="button" class="btn" data-close="annotationEditDialog">キャンセル</button><button type="button" class="btn primary" id="updateAnnotationBtn">保存</button></div>
+    <div class="danger-zone"><button type="button" class="btn danger" id="deleteAnnotationBtn">このアノテーションを削除</button></div>
   </div>
-  <label class="label" style="margin-bottom:12px">評価で絞り込み
-    <select id="annotationFilter" class="field"><option value="">すべて</option><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select>
-  </label>
-  <div id="annotationList" class="anno-list"></div>
-  <div class="modal-actions"><button type="button" class="btn" data-close="annotationsDialog">閉じる</button></div>
-</div></dialog>
-
-<dialog id="annotationEditDialog"><div class="modal">
-  <h2>アノテーション編集</h2>
-  <div id="editAnnotationQuote" class="quote-box"></div>
-  <div class="form-grid" style="margin-top:12px">
-    <label class="label">評価<select id="editAnnotationRating" class="field"><option value="3">❤️❤️❤️</option><option value="2">❤️❤️</option><option value="1">❤️</option><option value="0">△</option><option value="-1">❌</option></select></label>
-    <label class="label">コメント<textarea id="editAnnotationComment" class="field"></textarea></label>
-  </div>
-  <div class="modal-actions"><button type="button" class="btn" data-close="annotationEditDialog">キャンセル</button><button type="button" class="btn primary" id="updateAnnotationBtn">保存</button></div>
-  <div class="danger-zone"><button type="button" class="btn danger" id="deleteAnnotationBtn">このアノテーションを削除</button></div>
-</div></dialog>
+</dialog>
 
 <div id="toast" class="toast"></div>
-
 <script src="app.js"></script>
 </body>
 </html>
