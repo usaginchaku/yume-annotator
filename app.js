@@ -16,8 +16,8 @@
   }
   function inferPromptVersionFromFilename(name) {
     const base=String(name||'').replace(/\.(txt|md)$/i,'');
-    if (base.includes('新_')) return 'new';
-    if (base.includes('旧_')) return 'old';
+    if (base.includes('新プロンプト_')) return 'new';
+    if (base.includes('旧プロンプト_')) return 'old';
     return null;
   }
 
