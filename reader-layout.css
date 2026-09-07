@@ -1,0 +1,70 @@
+/* Ver. 1.16: iPhone Safari-safe reader layout.
+   The page itself does not scroll in reader mode. Only the article pane scrolls,
+   while the evaluation bar is a normal non-scrolling flex row. */
+body.reader-mode {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+body.reader-mode .app {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+body.reader-mode .topbar {
+  position: relative;
+  top: auto;
+  flex: 0 0 auto;
+}
+body.reader-mode main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+body.reader-mode #readerView {
+  height: 100%;
+  min-height: 0;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+}
+body.reader-mode #readerScrollBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+body.reader-mode #bottomEval {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  flex: 0 0 auto;
+  width: 100%;
+  z-index: 40 !important;
+  margin: 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+body.reader-mode #bottomEval[hidden] {
+  display: none !important;
+}
+@media (max-width: 680px) {
+  body.reader-mode main {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  body.reader-mode #readerScrollBody {
+    padding-top: 14px;
+  }
+}
