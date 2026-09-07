@@ -1,0 +1,62 @@
+/* Ver. 1.11: iPhone-friendly form inputs and in-app suggestion popup. */
+
+/* iOS Safari auto-zooms focused inputs smaller than 16px. Keep every editable
+   control at 16px or larger so opening the keyboard does not magnify the page. */
+input,
+select,
+textarea,
+.field,
+.toolbar input,
+.toolbar select {
+  font-size: 16px !important;
+}
+
+.suggest-host {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.suggest-host > .field {
+  display: block;
+}
+
+.site-suggestions {
+  position: absolute;
+  z-index: 120;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 210px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 14px 36px rgba(63,45,39,.18);
+}
+
+.site-suggestions[hidden] {
+  display: none !important;
+}
+
+.site-suggestion-item {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.site-suggestion-item:active,
+.site-suggestion-item:focus-visible {
+  background: var(--accent-2);
+  outline: none;
+}
