@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<title>夢小説アノテーションツール Ver. 1.8</title>
-<link rel="stylesheet" href="styles.css?v=1.8">
+<title>夢小説アノテーションツール Ver. 1.9</title>
+<link rel="stylesheet" href="styles.css?v=1.9">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.8</span></div>
+    <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.9</span></div>
     <div class="top-actions">
       <button class="btn small" id="exportJsonBtn">JSON書出</button>
       <button class="btn small" id="importJsonBtn">JSON読込</button>
@@ -159,31 +159,7 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=1.8"></script>
-<script>
-(() => {
-  const parseFilenameTitle = value => {
-    const match = String(value || '').trim().match(/^(新|旧)プロンプト_(.+)$/);
-    if (!match) return null;
-    return { prompt_version: match[1] === '新' ? 'new' : 'old', character: match[2].trim() };
-  };
-  const applyFilenameMetadata = () => {
-    const dialog = document.getElementById('workDialog');
-    const workId = document.getElementById('workId');
-    if (!dialog?.open || workId?.value) return;
-    const parsed = parseFilenameTitle(document.getElementById('workTitle')?.value);
-    if (!parsed) return;
-    const character = document.getElementById('workCharacter');
-    const version = document.getElementById('workVersion');
-    if (character) character.value = parsed.character;
-    if (version) version.value = parsed.prompt_version;
-  };
-  const dialog = document.getElementById('workDialog');
-  if (dialog) new MutationObserver(applyFilenameMetadata).observe(dialog, { attributes:true, attributeFilter:['open'] });
-  document.getElementById('workTitle')?.addEventListener('input', applyFilenameMetadata);
-  document.getElementById('newWorkTextFile')?.addEventListener('change', () => setTimeout(applyFilenameMetadata, 0));
-  document.getElementById('workDialogTextFile')?.addEventListener('change', () => setTimeout(applyFilenameMetadata, 0));
-})();
-</script>
+<script src="app.js?v=1.9"></script>
+<script src="import-filename.js?v=1.9"></script>
 </body>
 </html>
