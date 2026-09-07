@@ -85,6 +85,55 @@
   .toast.show { opacity:1; }
   .file-input { display:none; }
   .danger-zone { border-top:1px solid var(--line); margin-top:16px; padding-top:16px; }
+
+  /* Work editor: keep actions reachable and make the form itself scroll on iPhone Safari. */
+  #workDialog { overflow:hidden; }
+  #workDialog .modal {
+    display:flex;
+    flex-direction:column;
+    max-height:88dvh;
+    overflow:hidden;
+    padding:0;
+  }
+  .work-modal-head {
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 16px 10px;
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+  }
+  .work-modal-head h2 { margin:0; font-size:20px; flex:1; min-width:0; }
+  .work-modal-head .btn { flex:0 0 auto; }
+  #workDialogFileBtn { font-size:13px; padding-inline:10px; }
+  #workForm { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+  .work-fields {
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    padding:14px 16px 22px;
+    display:grid;
+    gap:12px;
+    touch-action:pan-y;
+  }
+  .work-actions {
+    flex:0 0 auto;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:10px 16px calc(10px + var(--safe-bottom));
+    margin:0;
+    border-top:1px solid var(--line);
+    background:rgba(255,253,251,.97);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .work-actions .btn { min-height:48px; font-weight:800; }
+  #workDeleteArea { flex:0 0 auto; margin:0; padding:10px 16px calc(10px + var(--safe-bottom)); background:var(--panel); }
+  #workText { min-height:320px !important; line-height:1.75; }
   @media (max-width:680px) {
     .topbar { padding-top:max(8px,env(safe-area-inset-top)); }
     .brand { font-size:15px; }
@@ -98,6 +147,19 @@
     .rating-btn { font-size:15px; padding:6px 2px; }
     #readerText { font-size:17px; line-height:2; }
     .text-wrap { padding:18px 15px; border-radius:15px; }
+    #workDialog {
+      width:calc(100% - 16px);
+      max-width:none;
+      height:calc(100dvh - 16px);
+      max-height:calc(100dvh - 16px);
+      margin:auto;
+      border-radius:20px;
+    }
+    #workDialog .modal { height:100%; max-height:none; }
+    .work-modal-head { padding-top:max(14px, env(safe-area-inset-top)); }
+    .work-fields { padding:14px 16px 28px; }
+    .work-actions { padding-left:16px; padding-right:16px; }
+    #workText { min-height:42dvh !important; }
   }
 </style>
 </head>
@@ -170,17 +232,24 @@
 </div></dialog>
 
 <dialog id="workDialog"><div class="modal">
-  <h2 id="workDialogTitle">作品を追加</h2>
-  <form id="workForm" class="form-grid">
-    <input type="hidden" id="workId">
-    <label class="label">タイトル *<input class="field" id="workTitle" required></label>
-    <label class="label">キャラクター *<input class="field" id="workCharacter" required></label>
-    <label class="label">プロンプト種別 *<select class="field" id="workVersion" required><option value="old">OLD</option><option value="new">NEW</option></select></label>
-    <label class="label">作品名 / シリーズ<input class="field" id="workSeries"></label>
-    <label class="label">pair_id<input class="field" id="workPair"></label>
-    <label class="label">シチュエーション<input class="field" id="workScenario"></label>
-    <label class="label">本文 *<textarea class="field" id="workText" required style="min-height:250px"></textarea></label>
-    <div class="modal-actions">
+  <div class="work-modal-head">
+    <button type="button" class="btn small ghost" data-close="workDialog" aria-label="閉じる">←</button>
+    <h2 id="workDialogTitle">作品を追加</h2>
+    <button type="button" class="btn small" id="workDialogFileBtn">ファイルから読み込み</button>
+    <input id="workDialogTextFile" class="file-input" type="file" accept="text/plain,text/markdown,.txt,.md">
+  </div>
+  <form id="workForm">
+    <div class="work-fields">
+      <input type="hidden" id="workId">
+      <label class="label">タイトル *<input class="field" id="workTitle" required></label>
+      <label class="label">キャラクター *<input class="field" id="workCharacter" required></label>
+      <label class="label">プロンプト種別 *<select class="field" id="workVersion" required><option value="old">OLD</option><option value="new">NEW</option></select></label>
+      <label class="label">作品名 / シリーズ<input class="field" id="workSeries"></label>
+      <label class="label">比較ペアID（任意）<input class="field" id="workPair" placeholder="例: dio-001"></label>
+      <label class="label">シチュエーション（任意）<input class="field" id="workScenario"></label>
+      <label class="label">本文 *<textarea class="field" id="workText" required></textarea></label>
+    </div>
+    <div class="work-actions">
       <button type="button" class="btn" data-close="workDialog">キャンセル</button>
       <button type="submit" class="btn primary">保存</button>
     </div>
@@ -428,6 +497,23 @@
       e.target.value = '';
     }
   });
+  $('workDialogFileBtn').addEventListener('click',()=>{ $('workDialogTextFile').click(); });
+  $('workDialogTextFile').addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const lower = file.name.toLowerCase();
+      if (!(lower.endsWith('.txt') || lower.endsWith('.md'))) throw new Error('対応形式は .txt / .md です。');
+      const text = await file.text();
+      if (!text.trim()) throw new Error('ファイルの本文が空です。');
+      $('workText').value = text;
+      if (!$('workTitle').value.trim()) $('workTitle').value = file.name.replace(/\.(txt|md)$/i, '');
+      toast('本文を読み込みました');
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。\n' + err.message);
+    } finally { e.target.value = ''; }
+  });
+
   $('editWorkBtn').addEventListener('click',()=>openWorkDialog(getWork()));
   function openWorkDialog(w=null, seed=null){
     const source = w || seed || {};
