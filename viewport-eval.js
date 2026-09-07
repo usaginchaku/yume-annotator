@@ -5,47 +5,60 @@
   const reader = document.getElementById('readerView');
   if (!bar || !reader) return;
 
-  // iPhone Safari can treat fixed descendants inconsistently while its browser
-  // chrome expands/collapses. Keep the evaluation bar as a direct child of
-  // <body>, outside the scrolling app tree, and let fixed positioning do the
-  // work without any scroll-offset translation.
-  if (bar.parentElement !== document.body) {
-    document.body.appendChild(bar);
+  // Build a reader shell once: the article body scrolls, the evaluation bar does not.
+  let scroller = document.getElementById('readerScrollBody');
+  if (!scroller) {
+    scroller = document.createElement('div');
+    scroller.id = 'readerScrollBody';
+
+    const header = reader.querySelector('.reader-header');
+    const textWrap = reader.querySelector('.text-wrap');
+    reader.insertBefore(scroller, reader.firstChild);
+    if (header) scroller.appendChild(header);
+    if (textWrap) scroller.appendChild(textWrap);
   }
 
-  function pinBar() {
-    if (reader.hidden) {
-      bar.hidden = true;
-      return;
-    }
-
-    bar.hidden = false;
-    bar.style.setProperty('position', 'fixed', 'important');
-    bar.style.setProperty('left', '0', 'important');
-    bar.style.setProperty('right', '0', 'important');
-    bar.style.setProperty('top', 'auto', 'important');
-    bar.style.setProperty('bottom', '0', 'important');
-    bar.style.setProperty('transform', 'none', 'important');
-    bar.style.setProperty('-webkit-transform', 'none', 'important');
-    bar.style.setProperty('z-index', '9999', 'important');
+  if (bar.parentElement !== reader) {
+    reader.appendChild(bar);
   }
 
-  // showView() toggles reader.hidden and bottomEval.hidden. Observe the reader
-  // so the bar is pinned immediately whenever the reading view becomes active.
-  new MutationObserver(pinBar).observe(reader, {
+  function syncReaderMode() {
+    const active = !reader.hidden;
+    document.body.classList.toggle('reader-mode', active);
+    bar.hidden = !active;
+
+    // Clear styles written by the legacy fixed-position logic in app.js.
+    bar.style.removeProperty('position');
+    bar.style.removeProperty('left');
+    bar.style.removeProperty('right');
+    bar.style.removeProperty('top');
+    bar.style.removeProperty('bottom');
+    bar.style.removeProperty('transform');
+    bar.style.removeProperty('-webkit-transform');
+    bar.style.removeProperty('z-index');
+  }
+
+  new MutationObserver(syncReaderMode).observe(reader, {
     attributes: true,
     attributeFilter: ['hidden']
   });
 
-  // Reassert the fixed styles when Safari changes its visible viewport. No
-  // scroll distance is added here; that was the source of the gradual drift.
-  window.addEventListener('pageshow', pinBar, { passive: true });
-  window.addEventListener('resize', pinBar, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(pinBar, 100), { passive: true });
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', pinBar, { passive: true });
-    window.visualViewport.addEventListener('scroll', pinBar, { passive: true });
-  }
+  // app.js may rewrite the bar's inline fixed styles after selection/scroll events.
+  // Strip those mutations immediately; CSS keeps the bar as a normal flex item.
+  new MutationObserver(() => {
+    if (reader.hidden) return;
+    if (bar.style.position || bar.style.bottom || bar.style.transform || bar.style.webkitTransform) {
+      bar.style.removeProperty('position');
+      bar.style.removeProperty('left');
+      bar.style.removeProperty('right');
+      bar.style.removeProperty('top');
+      bar.style.removeProperty('bottom');
+      bar.style.removeProperty('transform');
+      bar.style.removeProperty('-webkit-transform');
+      bar.style.removeProperty('z-index');
+    }
+  }).observe(bar, { attributes: true, attributeFilter: ['style', 'hidden'] });
 
-  pinBar();
+  window.addEventListener('pageshow', syncReaderMode, { passive:true });
+  syncReaderMode();
 })();
