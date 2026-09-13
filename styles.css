@@ -42,6 +42,15 @@
   .reader-title-row .btn { flex:0 0 auto; }
   .reader-meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
   .reader-actions { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+  .generation-details { margin:12px 0; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .generation-details summary { cursor:pointer; color:#514843; font-size:14px; font-weight:800; }
+  .generation-info { display:grid; gap:8px; margin-top:12px; }
+  .generation-info-row { display:grid; grid-template-columns:minmax(100px,auto) 1fr; gap:10px; align-items:start; font-size:13px; line-height:1.65; }
+  .generation-info-row b { color:var(--muted); }
+  .generation-info-row span { min-width:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .generation-data { margin-top:12px; }
+  .generation-data textarea { min-height:150px; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:13px !important; line-height:1.55; }
+  #generationPrompt { min-height:240px; }
   .work-note { width:100%; min-height:86px; resize:vertical; }
   .text-wrap { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:20px 17px; box-shadow:var(--shadow); }
   #readerText { white-space:pre-wrap; word-break:break-word; font-family:"Hiragino Mincho ProN","Yu Mincho",YuMincho,serif; font-size:17px; line-height:1.95; user-select:text; -webkit-user-select:text; }
@@ -148,6 +157,7 @@
     .rating-btn { font-size:15px; padding:6px 2px; }
     #readerText { font-size:17px; line-height:2; }
     .text-wrap { padding:18px 15px; border-radius:15px; }
+    .generation-info-row { grid-template-columns:1fr; gap:2px; }
     #workDialog {
       width:calc(100% - 16px);
       max-width:none;

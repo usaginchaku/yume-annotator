@@ -8,11 +8,21 @@
   const ratingLabel = r => ({'3':'❤️❤️❤️','2':'❤️❤️','1':'❤️','0':'△','-1':'❌'})[String(r)] ?? '';
   const ratingClass = r => r === 3 ? 'r3' : r === 2 ? 'r2' : r === 1 ? 'r1' : r === 0 ? 'r0' : 'rn1';
   const uniqueSorted = values => [...new Set(values.filter(Boolean).map(v => String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+  const cloneRecord = value => value && typeof value === 'object' && !Array.isArray(value) ? JSON.parse(JSON.stringify(value)) : null;
+  const promptVersionLabel = value => {
+    const version=String(value||'unknown').trim();
+    if(version==='old') return 'OLD';
+    if(version==='new') return 'NEW';
+    if(version==='unknown') return '版不明';
+    return /^\d+(?:\.\d+)+$/.test(version) ? `Ver.${version}` : version;
+  };
+  const promptVersionClass = value => ['old','new'].includes(String(value)) ? ` ${String(value)}` : '';
   function refreshWorkSuggestions() {
     const fill = (id, values) => { const el=$(id); if(el) el.innerHTML=uniqueSorted(values).map(v=>`<option value="${escapeHtml(v)}"></option>`).join(''); };
     fill('characterSuggestions', state.works.map(w=>w.character));
     fill('seriesSuggestions', state.works.map(w=>w.series));
     fill('pairSuggestions', state.works.map(w=>w.pair_id));
+    fill('versionSuggestions', state.works.map(w=>w.prompt_version));
   }
   function inferPromptVersionFromFilename(name) {
     const base=String(name||'').replace(/\.(txt|md)$/i,'');
@@ -33,23 +43,23 @@
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { schema_version:1, works:[] };
+      if (!raw) return { schema_version:2, works:[] };
       const parsed = JSON.parse(raw);
       return normalizeState(parsed);
     } catch (e) {
       console.error(e);
-      return { schema_version:1, works:[] };
+      return { schema_version:2, works:[] };
     }
   }
   function normalizeState(data) {
     const works = Array.isArray(data?.works) ? data.works : [];
-    return { schema_version:1, works:works.map(w => ({
-      id:w.id || uid('work'), title:w.title || '', character:w.character || '', prompt_version:w.prompt_version === 'new' ? 'new' : 'old',
+    return { schema_version:2, works:works.map(w => ({
+      id:w.id || uid('work'), title:w.title || '', character:w.character || '', prompt_version:String(w.prompt_version||'unknown').trim()||'unknown',
       full_text:w.full_text || '', series:w.series || '', pair_id:w.pair_id || '', scenario:w.scenario || '', notes:w.notes || '',
       created_at:w.created_at || nowIso(), updated_at:w.updated_at || nowIso(), annotations:Array.isArray(w.annotations) ? w.annotations.map(a => ({
         id:a.id || uid('annotation'), work_id:w.id || '', quote:a.quote || '', start:Number(a.start)||0, end:Number(a.end)||0,
         rating:[-1,0,1,2,3].includes(Number(a.rating)) ? Number(a.rating) : 0, comment:a.comment || '', created_at:a.created_at || nowIso(), updated_at:a.updated_at || nowIso()
-      })) : []
+      })) : [], source:cloneRecord(w.source), prompt_info:cloneRecord(w.prompt_info), generation:cloneRecord(w.generation)
     }))};
   }
   function saveState() {
@@ -68,13 +78,18 @@
   function renderList() {
     const q = $('searchInput').value.trim().toLowerCase();
     const char = $('characterFilter').value;
-    const ver = $('versionFilter').value;
+    const previousVersion = $('versionFilter').value;
     const chars = [...new Set(state.works.map(w => w.character).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
     const previous = $('characterFilter').value;
     $('characterFilter').innerHTML = '<option value="">全キャラ</option>' + chars.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     if (chars.includes(previous)) $('characterFilter').value = previous;
+    const versions=uniqueSorted(state.works.map(w=>w.prompt_version));
+    $('versionFilter').innerHTML='<option value="">全バージョン</option>'+versions.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(promptVersionLabel(v))}</option>`).join('');
+    if(versions.includes(previousVersion)) $('versionFilter').value=previousVersion;
+    const ver = $('versionFilter').value;
     const filtered = state.works.filter(w => {
-      const hay = `${w.title} ${w.character} ${w.series}`.toLowerCase();
+      const g=w.generation||{}, c=g.character||{}, p=w.prompt_info||{};
+      const hay = `${w.title} ${w.character} ${w.series} ${w.scenario} ${w.notes} ${w.prompt_version} ${c.series||''} ${g.relationship||''} ${g.mood||''} ${g.extra||''} ${p.version_id||''}`.toLowerCase();
       return (!q || hay.includes(q)) && (!char || w.character === char) && (!ver || w.prompt_version === ver);
     }).sort((a,b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
     const list = $('workList');
@@ -82,7 +97,7 @@
     list.innerHTML = filtered.map(w => {
       const anns = w.annotations || [], hi = anns.filter(a => a.rating >= 2).length, low = anns.filter(a => a.rating < 0).length;
       return `<article class="card work-card" data-work-id="${escapeHtml(w.id)}">
-        <div class="card-head"><div><div class="card-title">${escapeHtml(w.title)}</div><div class="subtle">${escapeHtml(w.character)}${w.series ? ' ・ '+escapeHtml(w.series) : ''}</div></div><span class="badge ${w.prompt_version}">${w.prompt_version.toUpperCase()}</span></div>
+        <div class="card-head"><div><div class="card-title">${escapeHtml(w.title)}</div><div class="subtle">${escapeHtml(w.character)}${w.series ? ' ・ '+escapeHtml(w.series) : ''}</div></div><span class="badge${promptVersionClass(w.prompt_version)}">${escapeHtml(promptVersionLabel(w.prompt_version))}</span></div>
         <div class="stats"><span>注釈 ${anns.length}</span><span>高評価 ${hi}</span><span>低評価 ${low}</span></div>
       </article>`;
     }).join('');
@@ -93,12 +108,49 @@
     currentWorkId = id; pendingSelection = null; window.getSelection()?.removeAllRanges();
     const w = getWork(); if (!w) return;
     $('readerTitle').textContent = w.title;
-    $('readerMeta').innerHTML = `<span class="badge ${w.prompt_version}">${w.prompt_version.toUpperCase()}</span><span class="badge">${escapeHtml(w.character)}</span>${w.series?`<span class="badge">${escapeHtml(w.series)}</span>`:''}`;
+    $('readerMeta').innerHTML = `<span class="badge${promptVersionClass(w.prompt_version)}">${escapeHtml(promptVersionLabel(w.prompt_version))}</span><span class="badge">${escapeHtml(w.character)}</span>${w.series?`<span class="badge">${escapeHtml(w.series)}</span>`:''}`;
     $('readerNotes').value = w.notes || '';
+    renderGenerationDetails(w);
     renderAnnotatedText(w);
     $('selectionStatus').textContent = '本文を選択してください';
     showView('reader'); window.scrollTo({top:0,behavior:'instant'});
     requestAnimationFrame(syncBottomEvalToVisualViewport);
+  }
+
+  function renderGenerationDetails(w) {
+    const details=$('generationDetails'), source=w.source||null, prompt=w.prompt_info||null, generation=w.generation||null;
+    if(!source&&!prompt&&!generation){details.hidden=true;details.open=false;$('generationInfo').replaceChildren();return;}
+    details.hidden=false; details.open=false;
+    const character=generation?.character||{};
+    const worldLabels={canon:'原作準拠',modern:'現代パロ',school:'学園パロ',unrestricted:'指定なし'};
+    const rows=[
+      ['プロンプト版',promptVersionLabel(w.prompt_version)],
+      ['版ID',prompt?.version_id],
+      ['標準版',prompt?.standard_version],
+      ['DreamGacha作品ID',source?.novel_id],
+      ['キャラ',character.name],
+      ['キャラID',character.id],
+      ['作品',character.work],
+      ['部・シリーズ',character.series],
+      ['キャラタグ',Array.isArray(character.tags)?character.tags.join('、'):''],
+      ['公称身長',character.heightText],
+      ['世界観',worldLabels[generation?.world_mode]||generation?.world_mode],
+      ['関係性',generation?.relationship],
+      ['シチュエーション',generation?.situation],
+      ['雰囲気',generation?.mood],
+      ['追加条件',generation?.extra],
+      ['自由指定',generation?.free_extra],
+      ['夢主設定',generation?.protagonist_profile],
+      ['作品別の夢主設定',generation?.work_protagonist_profile]
+    ].filter(([,value])=>value!==null&&value!==undefined&&String(value).trim());
+    $('generationInfo').innerHTML=rows.map(([label,value])=>`<div class="generation-info-row"><b>${escapeHtml(label)}</b><span>${escapeHtml(value)}</span></div>`).join('');
+    const recordData={...(prompt?.revision?{prompt_revision:prompt.revision}:{}),...(generation?.prompt_context?{prompt_context:generation.prompt_context}:{})};
+    const hasRecordData=Object.keys(recordData).length>0;
+    $('generationSettingsWrap').hidden=!hasRecordData;
+    $('generationSettings').value=hasRecordData?JSON.stringify(recordData,null,2):'';
+    const promptText=prompt?.text||'';
+    $('generationPromptWrap').hidden=!promptText;
+    $('generationPrompt').value=promptText;
   }
 
   function renderAnnotatedText(w) {
@@ -259,6 +311,21 @@
   $('newWorkBtn').addEventListener('click',()=>{ $('newWorkChoiceDialog').showModal(); });
   $('newWorkDirectBtn').addEventListener('click',()=>{ $('newWorkChoiceDialog').close(); openWorkDialog(); });
   $('newWorkFileBtn').addEventListener('click',()=>{ $('newWorkTextFile').click(); });
+  $('dreamGachaImportBtn').addEventListener('click',()=>{ $('dreamGachaImportFile').click(); });
+  $('dreamGachaImportFile').addEventListener('change',async e=>{
+    const file=e.target.files?.[0]; if(!file)return;
+    try{
+      if(!window.DreamGachaImport) throw new Error('DreamGacha読込機能を読み込めませんでした。ページを更新してください。');
+      const imported=window.DreamGachaImport.toWork(JSON.parse(await file.text()),{id:uid('work'),now:nowIso()});
+      const duplicate=state.works.find(w=>w.source?.app==='dream-gacha'&&w.source?.novel_id===imported.source.novel_id);
+      if(duplicate) throw new Error(`「${duplicate.title}」はすでに取り込み済みです。`);
+      state.works.push(imported);
+      if(!saveState()){state.works=state.works.filter(w=>w.id!==imported.id);return;}
+      batchImportQueue=[];batchImportTotal=0;
+      $('newWorkChoiceDialog').close();refreshWorkSuggestions();renderList();openReader(imported.id);
+      toast(`DreamGachaから「${imported.title}」を追加しました`);
+    }catch(err){alert('DreamGacha作品の読み込みに失敗しました。\n'+err.message)}finally{e.target.value=''}
+  });
   $('newWorkTextFile').addEventListener('change', async e => {
     const files = [...(e.target.files || [])];
     if (!files.length) return;
@@ -323,7 +390,7 @@
   function openWorkDialog(w=null, seed=null){
     const source = w || seed || {};
     refreshWorkSuggestions();
-    $('workDialogTitle').textContent=w?'作品を編集':'作品を追加'; $('workId').value=w?.id||''; $('workTitle').value=source.title||''; $('workCharacter').value=source.character||''; $('workVersion').value=source.prompt_version||'old'; $('workSeries').value=source.series||''; $('workPair').value=source.pair_id||''; $('workScenario').value=source.scenario||''; $('workText').value=source.full_text||''; $('workDeleteArea').hidden=!w; $('workDialog').showModal();
+    $('workDialogTitle').textContent=w?'作品を編集':'作品を追加'; $('workId').value=w?.id||''; $('workTitle').value=source.title||''; $('workCharacter').value=source.character||''; $('workVersion').value=source.prompt_version||'unknown'; $('workSeries').value=source.series||''; $('workPair').value=source.pair_id||''; $('workScenario').value=source.scenario||''; $('workText').value=source.full_text||''; $('workDeleteArea').hidden=!w; $('workDialog').showModal();
     requestAnimationFrame(() => {
       const back = $('workDialog').querySelector('[data-close="workDialog"]');
       try { back?.focus({preventScroll:true}); } catch (_) { back?.focus(); }
@@ -331,7 +398,7 @@
   }
   $('workForm').addEventListener('submit',e=>{
     e.preventDefault(); const id=$('workId').value; const existing=state.works.find(w=>w.id===id); const t=nowIso();
-    const payload={ title:$('workTitle').value.trim(), character:$('workCharacter').value.trim(), prompt_version:$('workVersion').value, series:$('workSeries').value.trim(), pair_id:$('workPair').value.trim(), scenario:$('workScenario').value.trim(), full_text:$('workText').value };
+    const payload={ title:$('workTitle').value.trim(), character:$('workCharacter').value.trim(), prompt_version:$('workVersion').value.trim()||'unknown', series:$('workSeries').value.trim(), pair_id:$('workPair').value.trim(), scenario:$('workScenario').value.trim(), full_text:$('workText').value };
     if(existing){
       const textChanged=existing.full_text!==payload.full_text;
       if(textChanged && existing.annotations.length && !confirm('本文を変更すると既存アノテーションの位置がずれる可能性があります。本文変更を保存しますか？')) return;
@@ -365,7 +432,7 @@
   $('backBtn').addEventListener('click',()=>{ const w=getWork(); if(w){w.notes=$('readerNotes').value; saveState();} currentWorkId=null; showView('list'); renderList(); });
 
   function exportDataForLLM() {
-    return { schema_version:1, exported_at:nowIso(), works:state.works.map(w=>({ id:w.id,title:w.title,series:w.series,character:w.character,prompt_version:w.prompt_version,pair_id:w.pair_id,scenario:w.scenario,notes:w.notes,full_text:w.full_text,annotations:(w.annotations||[]).map(a=>({id:a.id,quote:a.quote,start:a.start,end:a.end,rating:a.rating,comment:a.comment,created_at:a.created_at,updated_at:a.updated_at})),created_at:w.created_at,updated_at:w.updated_at })) };
+    return { schema_version:2, exported_at:nowIso(), works:state.works.map(w=>({ id:w.id,title:w.title,series:w.series,character:w.character,prompt_version:w.prompt_version,pair_id:w.pair_id,scenario:w.scenario,notes:w.notes,full_text:w.full_text,annotations:(w.annotations||[]).map(a=>({id:a.id,quote:a.quote,start:a.start,end:a.end,rating:a.rating,comment:a.comment,created_at:a.created_at,updated_at:a.updated_at})),created_at:w.created_at,updated_at:w.updated_at,source:cloneRecord(w.source),prompt_info:cloneRecord(w.prompt_info),generation:cloneRecord(w.generation) })) };
   }
   function download(filename, content, mime) {
     const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -375,7 +442,7 @@
   $('importJsonBtn').addEventListener('click',()=>$('importFile').click());
   $('importFile').addEventListener('change',async e=>{
     const file=e.target.files?.[0]; if(!file)return;
-    try { const parsed=JSON.parse(await file.text()); const imported=normalizeState(parsed); if(!confirm(`JSONから ${imported.works.length} 作品を読み込みます。現在のデータは置き換わります。よろしいですか？`)) return; state=imported; saveState(); currentWorkId=null; showView('list'); renderList(); toast('JSONを読み込みました'); }
+    try { const parsed=JSON.parse(await file.text()); const imported=normalizeState(parsed); if(!confirm(`JSONから ${imported.works.length} 作品を読み込みます。現在のデータは置き換わります。よろしいですか？`)) return; const previousState=state; state=imported; if(!saveState()){state=previousState;return;} currentWorkId=null; showView('list'); renderList(); toast('JSONを読み込みました'); }
     catch(err){alert('JSONの読み込みに失敗しました。\n'+err.message);} finally {e.target.value='';}
   });
   function toMarkdown(data){
@@ -384,6 +451,10 @@
       lines.push(`## ${i+1}. ${w.title}`,'',`- キャラクター: ${w.character}`,`- 作品名: ${w.series||''}`,`- prompt_version: ${w.prompt_version}`,`- pair_id: ${w.pair_id||''}`,`- scenario: ${w.scenario||''}`,'', '### 全体メモ','',w.notes||'','', '### 本文全文','',w.full_text||'','', '### アノテーション一覧','');
       if(!w.annotations.length) lines.push('（なし）','');
       w.annotations.forEach((a,j)=>lines.push(`#### ${j+1}. ${ratingLabel(a.rating)} / ${a.start}–${a.end}`,'',`> ${String(a.quote).replace(/\n/g,'\n> ')}`,'',`- 評価値: ${a.rating}`,`- コメント: ${a.comment||''}`,'',));
+      if(w.source?.app==='dream-gacha'){
+        const g=w.generation||{}, c=g.character||{}, p=w.prompt_info||{};
+        lines.push('### DreamGacha生成情報','',`- 元作品ID: ${w.source.novel_id||''}`,`- プロンプト版: ${w.prompt_version||''}`,`- プロンプト版ID: ${p.version_id||''}`,`- 作品: ${c.work||w.series||''}`,`- 部・シリーズ: ${c.series||''}`,`- 関係性: ${g.relationship||''}`,`- シチュエーション: ${g.situation||''}`,`- 雰囲気: ${g.mood||''}`,`- 追加条件: ${g.extra||''}`,'','#### 使用プロンプト','',p.text||'','');
+      }
       lines.push('---','');
     }); return lines.join('\n');
   }

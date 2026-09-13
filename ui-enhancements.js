@@ -89,4 +89,5 @@
   setupSiteSuggestions('workCharacter', 'characterSuggestions');
   setupSiteSuggestions('workSeries', 'seriesSuggestions');
   setupSiteSuggestions('workPair', 'pairSuggestions');
+  setupSiteSuggestions('workVersion', 'versionSuggestions');
 })();
