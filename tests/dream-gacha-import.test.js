@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const importer = require('../dream-gacha-import.js');
+const importer = require('../assets/js/dream-gacha-import.js');
 
 function fixture(overrides={}) {
   return {

@@ -14,5 +14,19 @@ AI生成夢小説のアノテーションをします。
 ## テスト
 
 ```sh
-node --test test/*.test.js
+node --test tests/*.test.js
+```
+
+## ディレクトリ構成
+
+```text
+.
+├─ index.html             # アプリ本体のページ
+├─ site.webmanifest       # PWA設定
+├─ apple-touch-icon.png   # iPhoneホーム画面用アイコン
+├─ assets/
+│  ├─ css/                # スタイル
+│  ├─ js/                 # アプリ機能
+│  └─ icons/              # favicon・PWAアイコン
+└─ tests/                 # Node.jsテスト
 ```
