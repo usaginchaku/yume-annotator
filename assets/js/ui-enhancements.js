@@ -86,6 +86,14 @@
     });
   }
 
+  const dataMenu = $('dataMenu');
+  if (dataMenu) {
+    dataMenu.querySelector('.data-menu-list').addEventListener('click', () => { dataMenu.open = false; });
+    document.addEventListener('pointerdown', event => {
+      if (!dataMenu.contains(event.target)) dataMenu.open = false;
+    });
+  }
+
   setupSiteSuggestions('workCharacter', 'characterSuggestions');
   setupSiteSuggestions('workSeries', 'seriesSuggestions');
   setupSiteSuggestions('workPair', 'pairSuggestions');

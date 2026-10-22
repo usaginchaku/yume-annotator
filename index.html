@@ -20,12 +20,15 @@
 <div class="app">
   <header class="topbar">
     <div class="brand">夢小説アノテーション <span class="app-version">Ver. 1.17</span></div>
-    <div class="top-actions">
-      <button class="btn small" id="exportJsonBtn">JSON書出</button>
-      <button class="btn small" id="importJsonBtn">JSON読込</button>
-      <button class="btn small" id="exportMdBtn">MD書出</button>
+    <details class="top-actions data-menu" id="dataMenu">
+      <summary class="btn small">データ</summary>
+      <div class="data-menu-list">
+        <button class="btn small" id="exportJsonBtn">JSON書出</button>
+        <button class="btn small" id="importJsonBtn">JSON読込</button>
+        <button class="btn small" id="exportMdBtn">MD書出</button>
+      </div>
       <input id="importFile" class="file-input" type="file" accept="application/json,.json">
-    </div>
+    </details>
   </header>
 
   <main>
